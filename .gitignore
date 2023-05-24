@@ -1,5 +1,7 @@
 MagicKnob/build/
 build/
+MagicKnob/CMakeLists.txt
+instructions.*
 .DS_Store
 .vscode
-MagicKnob/CMakeLists.txt
+MagicKnob/.vscode/
