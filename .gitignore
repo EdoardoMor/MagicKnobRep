@@ -1,6 +1,5 @@
-testplugin/build/
-drums_demix/Drums_Demix_models/saved_models/
-drums_demix/build/
+MagicKnob/build/
+build/
 .DS_Store
-drums_demix/CMakeLists.txt
-
+.vscode
+MagicKnob/CMakeLists.txt
