@@ -5,3 +5,5 @@ instructions.*
 .DS_Store
 .vscode
 MagicKnob/.vscode/
+MagicKnob/__pycache/
+MagicKnob/runs/

@@ -39,7 +39,7 @@ def load_wav_file(filename, want_samplerate):
 
     return data
 
-def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate):
+def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate, input):
     """
     load in the sent audio file and chop it into fragments of the sent length
     """
@@ -54,14 +54,22 @@ def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate):
     for i in range(num_frags):
         frag_start = i * num_samples_per_frag
         frag_end = (i + 1) * num_samples_per_frag
-        fragment = audio_data[frag_start:frag_end]
+
+        if(input):
+            fragment = np.empty([num_samples_per_frag, 2])
+
+            fragment[:,0] = np.squeeze(audio_data[frag_start:frag_end])
+            fragment[:,1] = np.ones(num_samples_per_frag)
+        else:
+            fragment = audio_data[frag_start:frag_end]
+
         if len(fragment) != num_samples_per_frag:
             continue 
         fragments.append(fragment)
 
-    return fragments
+    return np.array(fragments)
 
-def audio_filelist_to_fragments(audio_files, frag_len_seconds, samplerate):
+def audio_filelist_to_fragments(audio_files, frag_len_seconds, samplerate, input=False):
     """
     iterates the sent list of audio files
     loads their data, chops to fragments 
@@ -69,9 +77,10 @@ def audio_filelist_to_fragments(audio_files, frag_len_seconds, samplerate):
     """
     all_fragments = []
     for file in audio_files:
-        fragments = audio_file_to_fragments(file, frag_len_seconds, samplerate)
+        fragments = audio_file_to_fragments(file, frag_len_seconds, samplerate, input)
         all_fragments.extend(fragments)
-    return all_fragments
+        
+    return np.array(all_fragments)
 
 def generate_dataset(input_audio_folder, output_audio_folder, frag_len_seconds=0.5, samplerate=44100):#, pre_emphasis_filter=True):
     """
@@ -83,13 +92,14 @@ def generate_dataset(input_audio_folder, output_audio_folder, frag_len_seconds=0
     """
     assert os.path.exists(input_audio_folder), "Input audio folder not found " + input_audio_folder
     assert os.path.exists(output_audio_folder), "Output audio folder not found " + output_audio_folder
+
     # get audio files in the input folder
     input_files = get_files_in_folder(input_audio_folder, ".wav")
     output_files = get_files_in_folder(output_audio_folder, ".wav")
     assert len(input_files) > 0, "get_files_in_folder yielded zero inputs files"
     assert len(output_files) > 0, "get_files_in_folder yielded zero outputs files"
 
-    input_fragments = audio_filelist_to_fragments(input_files, frag_len_seconds, samplerate)
+    input_fragments = audio_filelist_to_fragments(input_files, frag_len_seconds, samplerate, input=True)
     output_fragments = audio_filelist_to_fragments(output_files, frag_len_seconds, samplerate)
 
     assert len(input_fragments) > 0, "get_files_in_folder yielded zero inputs"
@@ -100,12 +110,14 @@ def generate_dataset(input_audio_folder, output_audio_folder, frag_len_seconds=0
         input_fragments = input_fragments[0:len(output_fragments)]
     else:
         output_fragments = output_fragments[0:len(input_fragments)]
-    print("generate_dataset:: Loaded frames from audio file", len(input_fragments))
+    print("generate_dataset:: Loaded frames from audio file", len(input_fragments[0]))
     # Convert input and output fragments to PyTorch tensors
     # noting that the normal shape for an input to an LSTM 
     # is (sequence_length, batch_size, input_size]
     # so input_fragments[0]
-    input_tensor = torch.tensor(np.array(input_fragments))
+
+    np_array = np.array(input_fragments)
+    input_tensor = torch.from_numpy(np_array)
     print("input tensor shape", input_tensor.shape)
     output_tensor = torch.tensor(np.array(output_fragments))        
     dataset = TensorDataset(input_tensor, output_tensor)
