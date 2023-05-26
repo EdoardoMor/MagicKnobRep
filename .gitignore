@@ -6,4 +6,7 @@ instructions.*
 .vscode
 MagicKnob/.vscode/
 MagicKnob/__pycache/
+MagicKnob/python/__pycache__
+MagicKnob/python/runs
 MagicKnob/runs/
+.cache

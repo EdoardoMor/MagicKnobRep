@@ -39,7 +39,7 @@ def load_wav_file(filename, want_samplerate):
 
     return data
 
-def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate, input):
+def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate, input, param):
     """
     load in the sent audio file and chop it into fragments of the sent length
     """
@@ -59,7 +59,7 @@ def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate, input)
             fragment = np.empty([num_samples_per_frag, 2])
 
             fragment[:,0] = np.squeeze(audio_data[frag_start:frag_end])
-            fragment[:,1] = np.ones(num_samples_per_frag)
+            fragment[:,1] = param
         else:
             fragment = audio_data[frag_start:frag_end]
 
@@ -67,20 +67,21 @@ def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate, input)
             continue 
         fragments.append(fragment)
 
-    return np.array(fragments)
+    return fragments
 
-def audio_filelist_to_fragments(audio_files, frag_len_seconds, samplerate, input=False):
+def audio_filelist_to_fragments(audio_files, frag_len_seconds, samplerate, input=False, param=-1.0):
     """
     iterates the sent list of audio files
-    loads their data, chops to fragments 
+    loads their data, chops to fragments
+    input and param are needed to manage the shaping in audio_file_to_fragments 
     returns a list of all the fragments
     """
     all_fragments = []
     for file in audio_files:
-        fragments = audio_file_to_fragments(file, frag_len_seconds, samplerate, input)
+        fragments = audio_file_to_fragments(file, frag_len_seconds, samplerate, input, param)
         all_fragments.extend(fragments)
         
-    return np.array(all_fragments)
+    return all_fragments
 
 def generate_dataset(input_audio_folder, output_audio_folder, frag_len_seconds=0.5, samplerate=44100):#, pre_emphasis_filter=True):
     """
@@ -98,31 +99,77 @@ def generate_dataset(input_audio_folder, output_audio_folder, frag_len_seconds=0
     output_files = get_files_in_folder(output_audio_folder, ".wav")
     assert len(input_files) > 0, "get_files_in_folder yielded zero inputs files"
     assert len(output_files) > 0, "get_files_in_folder yielded zero outputs files"
+    assert len(input_files) == len(output_files), "number on input and output file does not correspond"
 
-    input_fragments = audio_filelist_to_fragments(input_files, frag_len_seconds, samplerate, input=True)
-    output_fragments = audio_filelist_to_fragments(output_files, frag_len_seconds, samplerate)
+    # better safe than sorry
+    input_files.sort()
+    output_files.sort()
 
-    assert len(input_fragments) > 0, "get_files_in_folder yielded zero inputs"
-    assert len(output_fragments) > 0, "get_files_in_folder yielded zero outputs"
+    # dictionarization
+    input_dict = {input_file.split("/")[-1].split("-")[0]: input_file for input_file in input_files}
+    output_dict = {output_file.split("/")[-1].split("-")[0]: output_file for output_file in output_files}
+
+    check_naming_requirements_and_matching(input_dict, output_dict)
+
+    init_arrays = True # control val
+    np_array_input = 0
+    np_array_output = 0
+
+    for param in input_dict:
+
+        input_fragments = audio_filelist_to_fragments([input_dict[param]], frag_len_seconds, samplerate, input=True, param=float(param))
+        output_fragments = audio_filelist_to_fragments([output_dict[param]], frag_len_seconds, samplerate)
+
+        # something went terribly wrong, should never fire
+        assert len(input_fragments) > 0, "get_files_in_folder yielded zero inputs"
+        assert len(output_fragments) > 0, "get_files_in_folder yielded zero outputs"
+        
+        # make lengths the same
+        if len(input_fragments) > len(output_fragments):
+            input_fragments = input_fragments[0:len(output_fragments)]
+        else:
+            output_fragments = output_fragments[0:len(input_fragments)]
+        print("generate_dataset:: Loaded frames from audio file", len(input_fragments[0]))
+        # Convert input and output fragments to PyTorch tensors
+        # noting that the normal shape for an input to an LSTM 
+        # is (sequence_length, batch_size, input_size]
+        # so input_fragments[0]
+
+        if init_arrays:
+            np_array_input = np.array(input_fragments)
+        else:
+            np_array_input = np.concatenate((np_array_input, np.array(input_fragments)))
+        print("input tensor shape", np_array_input.shape)
+
+        if init_arrays:
+            np_array_output = np.array(output_fragments)
+            init_arrays = False
+        else:
+            np_array_output = np.concatenate((np_array_output, np.array(output_fragments)))
+        print("output tensor shape", np_array_input.shape)     
     
-    # make lengths the same
-    if len(input_fragments) > len(output_fragments):
-        input_fragments = input_fragments[0:len(output_fragments)]
-    else:
-        output_fragments = output_fragments[0:len(input_fragments)]
-    print("generate_dataset:: Loaded frames from audio file", len(input_fragments[0]))
-    # Convert input and output fragments to PyTorch tensors
-    # noting that the normal shape for an input to an LSTM 
-    # is (sequence_length, batch_size, input_size]
-    # so input_fragments[0]
-
-    np_array = np.array(input_fragments)
-    input_tensor = torch.from_numpy(np_array)
+    input_tensor = torch.tensor(np_array_input)
+    output_tensor = torch.tensor(np_array_output) 
     print("input tensor shape", input_tensor.shape)
-    output_tensor = torch.tensor(np.array(output_fragments))        
     dataset = TensorDataset(input_tensor, output_tensor)
-    return dataset 
 
+    return dataset
+
+def check_naming_requirements_and_matching(input_keys, output_keys):
+    # check all parameters have been specified
+    for key in input_keys:
+        try:
+            float(key)
+        except: 
+            raise TypeError("please name all your output files starting with par_value-...")
+
+    for key in output_keys:
+        try:
+            param = float(key)
+        except: 
+            raise TypeError("please name all your input files starting with par_value-...")
+        
+        assert key in output_keys, f"not output file for paramenter {param} found"
 
 def get_train_valid_test_datasets(dataset, splits=[0.8, 0.1, 0.1]):
     assert type(dataset) == TensorDataset, "dataset should be a TensorDataset but it is " + type(dataset)
@@ -149,3 +196,8 @@ def get_train_valid_test_datasets(dataset, splits=[0.8, 0.1, 0.1]):
           
     train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
     return train_dataset, val_dataset, test_dataset
+
+# audio_folder = "/Users/macdonald/Desktop/MagicKnobRep/data/audio_ht1"
+# dataset = generate_dataset(audio_folder + "/input/", audio_folder + "/output/", frag_len_seconds=0.5)
+
+# train, val, test = get_train_valid_test_datasets(dataset)
