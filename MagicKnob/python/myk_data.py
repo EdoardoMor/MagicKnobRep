@@ -67,7 +67,7 @@ def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate, input,
             continue 
         fragments.append(fragment)
 
-    return fragments
+    return np.array(fragments, dtype=np.single)
 
 def audio_filelist_to_fragments(audio_files, frag_len_seconds, samplerate, input=False, param=-1.0):
     """

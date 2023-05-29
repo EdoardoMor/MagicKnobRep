@@ -15,11 +15,11 @@ from torch.utils.tensorboard import SummaryWriter
 # used for the writing of example outputs
 run_name="audacity_dist"
 # dataset : need an input and output folder in this folder
-audio_folder = "C:/POLIMI/Selected_Topics_ML_applied_to_Music/Lab_11/Polimi_starter_v4/data/audio_audacity_dist"
+audio_folder = "../../data/audio_ht1"
 #audio_folder = "../../data/audio_ht1"
 assert os.path.exists(audio_folder), "Audio folder  not found. Looked for " + audio_folder
 # used to render example output during training
-test_file = "C:/POLIMI/Selected_Topics_ML_applied_to_Music/Lab_11/Polimi_starter_v4/data/guitar.wav"
+test_file = "../../data/guitar.wav"
 assert os.path.exists(test_file), "Test file not found. Looked for " + test_file
 lstm_hidden_size = 32
 learning_rate = 5e-3
@@ -66,6 +66,8 @@ for epoch in range(max_epochs):
     val_loss = myk_train.compute_batch_loss(model, val_dl, loss_functions, device=device)
     writer.add_scalar("Loss/val", val_loss, epoch)
     writer.add_scalar("Loss/train", ep_loss, epoch)
+
+    print("superato train 1")
     
     # check if we have beaten our best loss to date
     if lowest_val_loss == 0:# first run

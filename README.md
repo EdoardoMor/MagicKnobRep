@@ -28,3 +28,7 @@ It uses quite a few assertions to check things, read the messages carefully it i
 The script automatically saves out examples of a test sound passed through the network as it runs
 
 # Load the model into C++
+
+# Naming Convention
+-Input: {name}-input.wav
+-Output: {param}-{name}-target.wav
