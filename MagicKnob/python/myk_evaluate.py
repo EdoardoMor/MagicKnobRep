@@ -22,9 +22,8 @@ def run_file_through_model(model, infile, outfile, samplerate=44100):
     for p in param_list:
         
         indata_parametric = add_param(indata, p)
-        outputs = model.forward(torch.tensor(indata_parametric).type("torch.FloatTensor"))#add .to(device) after .type(...)
+        outputs = model.forward(torch.tensor(indata_parametric, dtype=torch.float32))
         outputs = outputs.cpu().detach().numpy()
         outfile_temp = outfile[0: len(outfile)-4]
         outfile_def = outfile_temp+ "-" + f"{p}.wav"
         soundfile.write(outfile_def, outputs, samplerate)
-    
