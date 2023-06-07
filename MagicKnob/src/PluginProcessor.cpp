@@ -149,70 +149,28 @@ bool MagicKnobProcessor::isBusesLayoutSupported (const BusesLayout& layouts) con
 
 void MagicKnobProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    //////////// 
-    // deal with MIDI 
-
-     // transfer any pending notes into the midi messages and 
-    // clear pending - these messages come from the addMidi function
-    // which the UI might call to send notes from the piano widget
-    if (midiToProcess.getNumEvents() > 0){
-      midiMessages.addEvents(midiToProcess, midiToProcess.getFirstEventTime(), midiToProcess.getLastEventTime()+1, 0);
-      midiToProcess.clear();
-    }
-
-    for (const auto metadata : midiMessages){
-        auto message = metadata.getMessage();
-        if (message.isNoteOn()){
-            ampTarget = ampMax;
-            baseFrequency = juce::MidiMessage::getMidiNoteInHertz(message.getNoteNumber());
-            break;
-        }
-        if (message.isNoteOff()){
-            ampTarget = 0;
-        }
-    }
-
-    /////////////
-    // end of deal with MIDI
-
-    juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+ 
+    // In case we have more outputs than inputs, this code clears any output
+    // channels that didn't contain input data, (because these aren't
+    // guaranteed to be empty - they may contain garbage).
+    // I've added this to avoid people getting screaming feedback
+    // when they first compile the plugin, but obviously you don't need to
+    // this code if your algorithm already fills all the output channels.
+    for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
+    
+//    std::cout << processor->controls.mode << std::endl;
+//    std::cout << processor->controls.drive << std::endl;
+//    std::cout << processor->controls.mix << std::endl;
+//    std::cout << std::endl;
+    
+    for (int channel = 0; channel < getNumInputChannels(); ++channel) {
+        float* channelData = buffer.getWritePointer (channel);
 
-    // in case mod index changed
-    // update mod dphase 
-    modDPhase = getDPhase(baseFrequency*modIndex, getSampleRate());
-    double mod{0};// output of modulator
-    for (int channel = 0; channel < totalNumOutputChannels; ++channel){
-        if (channel == 0){
-            auto* channelData = buffer.getWritePointer (channel);
-            int numSamples = buffer.getNumSamples();
-            for (int sInd=0;sInd < numSamples; ++sInd){
-                // we compute carrDPhase every sample
-                // in FM synthesis
-
-                // first deal with the output
-                // of the modulator
-                mod = std::sin(modPhase);
-                mod *= modDepth * baseFrequency; // scale it 
-                modPhase += modDPhase; 
-                // now add mod output
-                // to the base freq
-                // and compute phase change 
-                // on carrier 
-                carrDPhase = getDPhase(baseFrequency + mod, getSampleRate());
-                channelData[sInd] = (float) (std::sin(carrPhase) * amp);
-
-                carrPhase += carrDPhase;
-
-                if (amp > ampTarget) amp -= dAmp;
-                if (amp < ampTarget) amp += dAmp;
-            }
+        for (int i = 0; i < buffer.getNumSamples(); ++i) {
+            channelData[i] = channelData[i];
         }
     }
-
   
 
   
