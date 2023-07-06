@@ -163,7 +163,7 @@ class SimpleConv2D(torch.nn.Module):
  
     def forward(self, x):
                 
-        print("input shape: " + str(x.size()))
+        # print("input shape: " + str(x.size()))
         x, phase = self.batch_stft(x)
         #print("input shape post stft: " + str(x.size()))
 
@@ -195,7 +195,7 @@ class SimpleConv2D(torch.nn.Module):
         x = self.batch_istft(x, phase, trim_length=None)
 
         x = torch.unsqueeze(x, 2)
-        print("output shape post istft: " + str(x.size()))
+        # print("output shape post istft: " + str(x.size()))
 
         return x
     
