@@ -1,12 +1,13 @@
-MagicKnob/build/
-build/
-MagicKnob/CMakeLists.txt
 instructions.*
 .DS_Store
 .vscode
+.cache
+build/
+
+MagicKnob/build/
 MagicKnob/.vscode/
 MagicKnob/__pycache/
 MagicKnob/python/__pycache__
 MagicKnob/python/runs
 MagicKnob/runs/
-.cache
+MagicKnob/CMakeLists.txt

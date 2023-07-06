@@ -1,0 +1,6 @@
+audio_conv1d_rev/*.wav
+!audio_conv1d_rev/*_BEST.wav
+audio_conv1d_dist/*.wav
+!audio_conv1d_dist/*_BEST.wav
+audio_cond1d_dist/*.wav
+!audio_cond1d_dist/*_BEST.wav

@@ -73,11 +73,15 @@ class SimpleConv1D(torch.nn.Module):
         self.conv2 = torch.nn.Conv1d(16, 32, kernel_size=5, stride=1, padding='same')
         self.act2 = torch.nn.PReLU()
 
-        # self.conv3 = torch.nn.Conv1d(32, 64, kernel_size=5, stride=1, padding='same')
-        # self.act3 = torch.nn.PReLU()
+        # commented for dist
 
-        # self.conv4 = torch.nn.Conv1d(64, 32, kernel_size=5, stride=1, padding='same')
-        # self.act4 = torch.nn.PReLU()
+        self.conv3 = torch.nn.Conv1d(32, 64, kernel_size=5, stride=1, padding='same')
+        self.act3 = torch.nn.PReLU()
+
+        self.conv4 = torch.nn.Conv1d(64, 32, kernel_size=5, stride=1, padding='same')
+        self.act4 = torch.nn.PReLU()
+
+        # till here
 
         self.conv5 = torch.nn.Conv1d(32, 16, kernel_size=5, stride=1, padding='same')
         self.act5 = torch.nn.PReLU()
