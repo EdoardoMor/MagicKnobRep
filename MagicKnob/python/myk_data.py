@@ -179,7 +179,7 @@ def check_output_naming(output_file_path, name):
     split = output_file_name.split("-")
 
     # check structure and name
-    assert len(split) == 2, "incorrect target naming convention, please name the outputs: par-name-target.wav"
+    assert len(split) == 2, "incorrect target naming convention, please name the outputs: name-target.wav"
 
     if split[0] == name:
         # check target keyward

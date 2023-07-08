@@ -16,7 +16,7 @@ class SimpleLSTM(torch.nn.Module):
     """
 
     model_type = "LSTM"
-    
+    input_dim = 1
 
     def __init__(self, hidden_size=32, param=False):
         super().__init__()
@@ -24,8 +24,6 @@ class SimpleLSTM(torch.nn.Module):
 
         if param:
             self.input_dim = 2
-        else:
-            self.input_dim = 1
 
         self.lstm = torch.nn.LSTM(self.input_dim, hidden_size, batch_first=True)
         self.dense = torch.nn.Linear(hidden_size, 1)# from 8 hidden back to 1 output
@@ -150,11 +148,15 @@ class SimpleConv1D(torch.nn.Module):
 class SimpleConv2D(torch.nn.Module):
 
     model_type = "Conv2D"
+    input_dim = 1
 
-    def __init__(self):
+    def __init__(self, param=False):
         super().__init__()
 
-        self.conv1 = torch.nn.Conv2d(1, 16, kernel_size=(3,3), stride=1, padding='same')
+        if param:
+            self.input_dim = 2
+
+        self.conv1 = torch.nn.Conv2d(self.input_dim, 16, kernel_size=(3,3), stride=1, padding='same')
         self.act1 = torch.nn.ReLU()
 
         self.conv2 = torch.nn.Conv2d(16, 32, kernel_size=(3,3), stride=1, padding='same')
