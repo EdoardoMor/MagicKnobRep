@@ -14,3 +14,5 @@ audio_conv1d_dist_par/*.wav
 !audio_conv1d_dist_par/*_BEST.wav
 audio_lstm_lpf/*.wav
 !audio_lstm_lpf/*_BEST.wav
+audio_lstm_lpf_par/*.wav
+!audio_lstm_lpf_par/*_BEST.wav
