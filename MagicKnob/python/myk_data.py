@@ -39,7 +39,7 @@ def load_wav_file(filename, want_samplerate):
 
     return data
 
-def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate, input, param):
+def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate):
     """
     load in the sent audio file and chop it into fragments of the sent length
     """
@@ -55,13 +55,8 @@ def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate, input,
         frag_start = i * num_samples_per_frag
         frag_end = (i + 1) * num_samples_per_frag
 
-        if(input):
-            fragment = np.empty([num_samples_per_frag, 2])
-
-            fragment[:,0] = np.squeeze(audio_data[frag_start:frag_end])
-            fragment[:,1] = param
-        else:
-            fragment = audio_data[frag_start:frag_end]
+        
+        fragment = audio_data[frag_start:frag_end]
 
         if len(fragment) != num_samples_per_frag:
             continue 
@@ -69,16 +64,15 @@ def audio_file_to_fragments(audio_filepath, frag_len_seconds, samplerate, input,
 
     return np.array(fragments, dtype=np.single)
 
-def audio_filelist_to_fragments(audio_files, frag_len_seconds, samplerate, input=False, param=-1.0):
+def audio_filelist_to_fragments(audio_files, frag_len_seconds, samplerate):
     """
     iterates the sent list of audio files
     loads their data, chops to fragments
-    input and param are needed to manage the shaping in audio_file_to_fragments 
     returns a list of all the fragments
     """
     all_fragments = []
     for file in audio_files:
-        fragments = audio_file_to_fragments(file, frag_len_seconds, samplerate, input, param)
+        fragments = audio_file_to_fragments(file, frag_len_seconds, samplerate)
         all_fragments.extend(fragments)
         
     return np.array(all_fragments)
@@ -100,13 +94,9 @@ def generate_dataset(input_audio_folder, output_audio_folder, frag_len_seconds=0
     assert len(input_files) > 0, "get_files_in_folder yielded zero inputs files"
     assert len(output_files) > 0, "get_files_in_folder yielded zero outputs files"
 
-    # better safe than sorry
-    input_files.sort()
-    output_files.sort()
-
     # naming conventions:
     #   - input:    name-input.wav
-    #   - output:   param-name-target.wav
+    #   - output:   name-target.wav
 
     # dictionarization
     # name: filename
@@ -122,54 +112,53 @@ def generate_dataset(input_audio_folder, output_audio_folder, frag_len_seconds=0
         print(f"loading input and output of {name}")
 
         # dictionarization
-        # param: filename
+        # name: filename
         output_dict = {
             output_file_name.split("/")[-1].split("-")[0]: output_file_name 
                 for output_file_name in output_files 
                 if check_output_naming(output_file_name, name)
         }
         
-        assert len(output_dict) > 0, f"no outputs found for input: {name}"
+        assert len(output_dict) == len(input_dict), f"found a number of output != 1: {name}"
 
-        for param in output_dict:
-            print(f"    loading output of {name} with parameter {param}")
+        print(f"    loading output of {name}")
 
-            input_fragments = audio_filelist_to_fragments([input_dict[name]], frag_len_seconds, samplerate, input=True, param=float(param))
-            output_fragments = audio_filelist_to_fragments([output_dict[param]], frag_len_seconds, samplerate)
+        input_fragments = audio_filelist_to_fragments([input_dict[name]], frag_len_seconds, samplerate)
+        output_fragments = audio_filelist_to_fragments([output_dict[name]], frag_len_seconds, samplerate)
 
-            # something went terribly wrong, should never fire
-            assert len(input_fragments) > 0, "get_files_in_folder yielded zero inputs"
-            assert len(output_fragments) > 0, "get_files_in_folder yielded zero outputs"
-            
-            # make lengths the same
-            if len(input_fragments) > len(output_fragments):
-                input_fragments = input_fragments[0:len(output_fragments)]
-            else:
-                output_fragments = output_fragments[0:len(input_fragments)]
-            print("    generate_dataset:: Loaded frames from audio file", len(input_fragments[0]))
-            # Convert input and output fragments to PyTorch tensors
-            # noting that the normal shape for an input to an LSTM 
-            # is (sequence_length, batch_size, input_size]
-            # so input_fragments[0]
+        # something went terribly wrong, should never fire
+        assert len(input_fragments) > 0, "get_files_in_folder yielded zero inputs"
+        assert len(output_fragments) > 0, "get_files_in_folder yielded zero outputs"
+        
+        # make lengths the same
+        if len(input_fragments) > len(output_fragments):
+            input_fragments = input_fragments[0:len(output_fragments)]
+        else:
+            output_fragments = output_fragments[0:len(input_fragments)]
+        print("    generate_dataset:: Loaded frames from audio file", len(input_fragments[0]))
+        # Convert input and output fragments to PyTorch tensors
+        # noting that the normal shape for an input to an LSTM 
+        # is (sequence_length, batch_size, input_size]
+        # so input_fragments[0]
 
-            print(f"    found input fragments of shape {input_fragments.shape}")
+        print(f"    found input fragments of shape {input_fragments.shape}")
 
-            if init_arrays:
-                np_array_input = np.array(input_fragments)
-            else:
-                np_array_input = np.concatenate((np_array_input, np.array(input_fragments)))
-            
+        if init_arrays:
+            np_array_input = np.array(input_fragments)
+        else:
+            np_array_input = np.concatenate((np_array_input, np.array(input_fragments)))
+        
 
-            print(f"    found output fragments of shape {output_fragments.shape}")
+        print(f"    found output fragments of shape {output_fragments.shape}")
 
-            if init_arrays:
-                np_array_output = np.array(output_fragments)
-                init_arrays = False
-            else:
-                np_array_output = np.concatenate((np_array_output, np.array(output_fragments)))
-            
-            print(f"    total input shape: {np_array_input.shape}")
-            print(f"    total output shape: {np_array_output.shape}\n")     
+        if init_arrays:
+            np_array_output = np.array(output_fragments)
+            init_arrays = False
+        else:
+            np_array_output = np.concatenate((np_array_output, np.array(output_fragments)))
+        
+        print(f"    total input shape: {np_array_input.shape}")
+        print(f"    total output shape: {np_array_output.shape}\n")     
         
     input_tensor = torch.tensor(np_array_input)
     output_tensor = torch.tensor(np_array_output) 
@@ -190,16 +179,11 @@ def check_output_naming(output_file_path, name):
     split = output_file_name.split("-")
 
     # check structure and name
-    assert len(split) == 3, "incorrect target naming convention, please name the outputs: par-name-target.wav"
+    assert len(split) == 2, "incorrect target naming convention, please name the outputs: par-name-target.wav"
 
-    if split[1] == name:
+    if split[0] == name:
         # check target keyward
-        assert output_file_name == f"{split[0]}-{name}-target.wav", "incorrect target naming convention, please name the outputs: par-name-target.wav"
-
-        try:
-            float(split[0])
-        except:
-            raise TypeError(f"invalid parameter, please name the outputs: par-name-target.wav")
+        assert output_file_name == f"{name}-target.wav", "incorrect target naming convention, please name the outputs: name-target.wav"
 
         return True
     
@@ -230,9 +214,3 @@ def get_train_valid_test_datasets(dataset, splits=[0.8, 0.1, 0.1]):
           
     train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
     return train_dataset, val_dataset, test_dataset
-
-# test
-# audio_folder = "/Users/macdonald/Desktop/MagicKnobRep/data/audio_ht1"
-# dataset = generate_dataset(audio_folder + "/input/", audio_folder + "/output/", frag_len_seconds=0.5)
-
-# train, val, test = get_train_valid_test_datasets(dataset)

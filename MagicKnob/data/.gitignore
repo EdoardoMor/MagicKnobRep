@@ -10,3 +10,5 @@ audio_conv1d_phaser/*.wav
 !audio_conv1d_phaser/*_BEST.wav
 audio_conv2d_phaser/*.wav
 !audio_conv2d_phaser/*_BEST.wav
+audio_conv1d_dist_par/*.wav
+!audio_conv1d_dist_par/*_BEST.wav

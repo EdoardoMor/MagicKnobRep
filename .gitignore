@@ -11,3 +11,5 @@ MagicKnob/python/__pycache__
 MagicKnob/python/runs
 MagicKnob/runs/
 MagicKnob/CMakeLists.txt
+MagicKnob/.tmp.drivedownload
+MagicKnob/.tmp.driveupload
