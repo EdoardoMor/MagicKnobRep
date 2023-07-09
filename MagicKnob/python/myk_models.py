@@ -18,14 +18,15 @@ class SimpleLSTM(torch.nn.Module):
     model_type = "LSTM"
     input_dim = 1
 
-    def __init__(self, hidden_size=32, param=False):
+    def __init__(self, hidden_size=32, num_layers=1, dropout=0, param=False): 
         super().__init__()
         # Batch first means input data is [batch,sequence,feature]
 
         if param:
             self.input_dim = 2
 
-        self.lstm = torch.nn.LSTM(self.input_dim, hidden_size, batch_first=True)
+        self.lstm = torch.nn.LSTM(input_size=self.input_dim, hidden_size=hidden_size, batch_first=True,
+                                  num_layers=num_layers, dropout=dropout)
         self.dense = torch.nn.Linear(hidden_size, 1)# from 8 hidden back to 1 output
         self.drop_hidden = True
 
