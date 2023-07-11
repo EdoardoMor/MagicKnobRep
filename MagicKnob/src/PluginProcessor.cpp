@@ -21,18 +21,9 @@ MagicKnobProcessor::MagicKnobProcessor()
                      #endif
                        )
 #endif
-,  baseFrequency{440}, 
-     carrPhase{0}, 
-     carrDPhase{0}, 
 
-     //modFreq{0}, 
-     modPhase{0}, 
-     modDPhase{0}, 
     
-     modIndex{1}, 
-     modDepth{0}, 
-    
-   amp{0}, ampTarget{0}, dAmp{0.00001}, ampMax{0.25}
+   ,amp{0}, ampTarget{0}, dAmp{0.00001}, ampMax{0.25}
 {
 }
 
@@ -106,12 +97,16 @@ void MagicKnobProcessor::changeProgramName (int index, const juce::String& newNa
 void MagicKnobProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
 
+    auto modelFilePath = "C:/PROGETTI/STMAE/MagicKnobRep/model_dist_2.json";
+    //assert(std::filesystem::exists(modelFilePath));
 
+    DBG("Loading model from path: "); 
+    DBG(modelFilePath);
+    
+    std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
+    loadModel(jsonStream, model);
+    model.reset();
 
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-    carrDPhase = getDPhase(baseFrequency, getSampleRate());
-    modDPhase = getDPhase(baseFrequency*modIndex, getSampleRate());
 
 }
 
@@ -168,10 +163,24 @@ void MagicKnobProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         float* channelData = buffer.getWritePointer (channel);
 
         for (int i = 0; i < buffer.getNumSamples(); ++i) {
-            channelData[i] = channelData[i];
+            //channelData[i] = channelData[i];
+            float* inputArr = { channelData[i], magicKnobValue };
+            channelData[i] = model.forward(inputArr);
         }
     }
   
+  /*
+        // now take the model for a spin :) 
+    std::vector<float> inputs {1.0, 2.0, 3.0, 4.0};
+    std::vector<float> outputs {};
+    outputs.resize(inputs.size(), {});
+
+    for(size_t i = 0; i < inputs.size(); ++i)
+    {
+        outputs[i] = model.forward(&inputs[i]);
+        std::cout << "in " << inputs[i] << " out: " << outputs[i] << std::endl;
+    }
+  */
 
   
  
@@ -209,27 +218,6 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new MagicKnobProcessor();
 }
 
-double MagicKnobProcessor::getDPhase(double freq, double sampleRate)
-{
-    double two_pi = 3.1415927 * 2;
-    return (two_pi / sampleRate) * freq;   
-}
-void MagicKnobProcessor::updateFrequency(double newFreq)
-{
-    baseFrequency = newFreq; 
-}
-
-void MagicKnobProcessor::updateFMParams(double _modIndex, double _modDepth)
-{
-    modIndex = _modIndex;
-    modDepth = _modDepth;
-}
-
-
-void MagicKnobProcessor::addMidi(juce::MidiMessage msg, int sampleOffset)
-{
-  midiToProcess.addEvent(msg, sampleOffset);
-}
 
 
 void MagicKnobProcessor::setEnvLength(double envLenSecs)
@@ -246,7 +234,7 @@ void MagicKnobProcessor::setEnvLength(double envLenSecs)
     }
 }
 
-void loadModel(std::ifstream& jsonStream, ModelType& model)
+void MagicKnobProcessor::loadModel(std::ifstream& jsonStream, ModelType& model)
 {
     nlohmann::json modelJson;
     jsonStream >> modelJson;
@@ -266,4 +254,10 @@ void loadModel(std::ifstream& jsonStream, ModelType& model)
     auto& dense = model.get<1>();
     // as per the lstm prefix, here the json needs a key prefixed with dense. 
     RTNeural::torch_helpers::loadDense<float> (modelJson, "dense.", dense);
+}
+
+void MagicKnobProcessor::setMagicKnobValue(float val)
+{
+    magicKnobValue = val;
+
 }

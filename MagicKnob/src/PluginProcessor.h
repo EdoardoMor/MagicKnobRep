@@ -38,7 +38,9 @@
 #include <filesystem>
 #include <RTNeural/RTNeural.h>
 
-using ModelType = RTNeural::ModelT<float, 1, 1, RTNeural::LSTMLayerT<float, 1, 32>, RTNeural::DenseT<float, 32, 1>>;
+using ModelType = RTNeural::ModelT<float, 2, 1, RTNeural::LSTMLayerT<float, 2, 32>, RTNeural::DenseT<float, 32, 1>>;
+
+//using ModelType = RTNeural::ModelT<float, 1, 1, RTNeural::LSTMLayerT<float, 1, 32>, RTNeural::DenseT<float, 32, 1>>;
 
 //==============================================================================
 /**
@@ -95,34 +97,21 @@ public:
     void setEnvLength(double envLengthSecs);
 
     void loadModel(std::ifstream& jsonStream, ModelType& model);
+
+    void setMagicKnobValue(float val);
     
 
 private:
-    // double phase;
-    // double dphase;
 
-
-    double baseFrequency;  
-
-    double carrPhase;
-    double carrDPhase;
-
-    //double modFreq; 
-    double modPhase; 
-    double modDPhase; 
-    
-    double modIndex;
-    double modDepth;
 
     double amp;
     double ampTarget;
     double dAmp;  
     double ampMax;
 
-    double getDPhase(double freq, double sampleRate);
+    ModelType model;
 
-    /** stores messages added from the addMidi function*/
-    juce::MidiBuffer midiToProcess;
+    float magicKnobValue;
 
 
       //==============================================================================
