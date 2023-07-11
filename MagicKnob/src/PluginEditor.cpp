@@ -29,8 +29,9 @@ MagicKnobEditor::MagicKnobEditor (MagicKnobProcessor& p)
     // editor's size to whatever you need it to be.
     setSize (500, 500);
 
-    addAndMakeVisible(envToggle);
-    envToggle.addListener(this);
+    addAndMakeVisible(powerToggle);
+    powerToggle.setButtonText("ON/OFF");
+    powerToggle.addListener(this);
     
 
     addAndMakeVisible(superKnob);
@@ -65,7 +66,7 @@ void MagicKnobEditor::resized()
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
     float rowHeight = getHeight()/5; 
-    envToggle.setBounds(0, 0, getWidth()/2, rowHeight);
+    powerToggle.setBounds(0, 0, getWidth()/2, rowHeight);
     superKnob.setBounds(getWidth()/2, 0, getWidth()/2, rowHeight);
 
     
@@ -97,12 +98,9 @@ juce::AudioBuffer<float> MagicKnobEditor::getAudioBufferFromFile(juce::File file
 */
 void MagicKnobEditor::buttonClicked(juce::Button* btn)
 {
-    if (btn == &envToggle){
-        double envLen = 0;
-        if (envToggle.getToggleState()) { // one
-            envLen = 1;
-        }
-        audioProcessor.setEnvLength(envLen);
+    if (btn == &powerToggle){
+        if (powerToggle.getToggleState())
+            audioProcessor.togglePowerState();
     }
 
 }

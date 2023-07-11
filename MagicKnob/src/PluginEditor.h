@@ -56,7 +56,7 @@ public:
 
 private:
 
-    juce::ToggleButton envToggle; 
+    juce::ToggleButton powerToggle; 
     juce::Slider superKnob;
 
     // torch::nn::Linear linear{1, 2}; 

@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "juce_core/system/juce_PlatformDefs.h"
 
 //==============================================================================
 MagicKnobProcessor::MagicKnobProcessor()
@@ -23,7 +24,7 @@ MagicKnobProcessor::MagicKnobProcessor()
 #endif
 
     
-   ,amp{0}, ampTarget{0}, dAmp{0.00001}, ampMax{0.25}
+   ,amp{0}, ampTarget{0}, dAmp{0.00001}, ampMax{0.25}, powerState(false)
 {
 }
 
@@ -97,7 +98,7 @@ void MagicKnobProcessor::changeProgramName (int index, const juce::String& newNa
 void MagicKnobProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
 
-    auto modelFilePath = "C:/PROGETTI/STMAE/MagicKnobRep/model_dist_2.json";
+    auto modelFilePath = "/Users/macdonald/Desktop/MagicKnobRep/model_dist_2.json";
     //assert(std::filesystem::exists(modelFilePath));
 
     DBG("Loading model from path: "); 
@@ -163,9 +164,13 @@ void MagicKnobProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
         float* channelData = buffer.getWritePointer (channel);
 
         for (int i = 0; i < buffer.getNumSamples(); ++i) {
-            //channelData[i] = channelData[i];
-            float* inputArr = { channelData[i], magicKnobValue };
-            channelData[i] = model.forward(inputArr);
+            if(powerState){
+                float temp[2] = {channelData[i], magicKnobValue};
+                const float *inputArr = temp; 
+                channelData[i] = model.forward(inputArr);
+            } else {
+                channelData[i] = channelData[i];
+            }
         }
     }
   
@@ -259,5 +264,9 @@ void MagicKnobProcessor::loadModel(std::ifstream& jsonStream, ModelType& model)
 void MagicKnobProcessor::setMagicKnobValue(float val)
 {
     magicKnobValue = val;
+}
 
+void MagicKnobProcessor::togglePowerState()
+{
+    powerState = !powerState;
 }

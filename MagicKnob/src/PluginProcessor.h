@@ -99,6 +99,7 @@ public:
     void loadModel(std::ifstream& jsonStream, ModelType& model);
 
     void setMagicKnobValue(float val);
+    void togglePowerState();
     
 
 private:
@@ -108,6 +109,7 @@ private:
     double ampTarget;
     double dAmp;  
     double ampMax;
+    bool powerState;
 
     ModelType model;
 
