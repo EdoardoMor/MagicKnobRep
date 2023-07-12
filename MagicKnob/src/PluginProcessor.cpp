@@ -98,15 +98,20 @@ void MagicKnobProcessor::changeProgramName (int index, const juce::String& newNa
 void MagicKnobProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
 
-    auto modelFilePath = "/Users/macdonald/Desktop/MagicKnobRep/model_dist_2.json";
+    auto modelFilePath = "C:/PROGETTI/STMAE/MagicKnobRep/model.json";
     //assert(std::filesystem::exists(modelFilePath));
 
     DBG("Loading model from path: "); 
     DBG(modelFilePath);
     
     std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
-    loadModel(jsonStream, model);
-    model.reset();
+    loadModel(jsonStream, models[0]);
+
+    auto modelFilePath2 = "C:/PROGETTI/STMAE/MagicKnobRep/model.json";
+    std::ifstream jsonStream2(modelFilePath2, std::ifstream::binary);
+    loadModel(jsonStream2, models[1]); //genera eccezione!
+    models[0].reset();
+    models[1].reset();
 
 
 }
@@ -165,9 +170,15 @@ void MagicKnobProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 
         for (int i = 0; i < buffer.getNumSamples(); ++i) {
             if(powerState){
+
+                /* DECOMMENTARE PER NET A 2 INPUT
                 float temp[2] = {channelData[i], magicKnobValue};
                 const float *inputArr = temp; 
                 channelData[i] = model.forward(inputArr);
+                */
+
+                float input[] = { channelData[i] };
+                channelData[i] = models[channel].forward (input);
             } else {
                 channelData[i] = channelData[i];
             }

@@ -9,7 +9,6 @@
 #include <iostream>
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Utils.cpp"
 
 
 #include <torch/torch.h>
@@ -77,7 +76,6 @@ void MagicKnobEditor::resized()
 
     if (slider == &superKnob){
 
-        DBG("ruotando il magic knob");
         audioProcessor.setMagicKnobValue(slider->getValue());
     }
 }

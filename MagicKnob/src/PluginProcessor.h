@@ -38,9 +38,9 @@
 #include <filesystem>
 #include <RTNeural/RTNeural.h>
 
-using ModelType = RTNeural::ModelT<float, 2, 1, RTNeural::LSTMLayerT<float, 2, 32>, RTNeural::DenseT<float, 32, 1>>;
+//using ModelType = RTNeural::ModelT<float, 2, 1, RTNeural::LSTMLayerT<float, 2, 32>, RTNeural::DenseT<float, 32, 1>>;
 
-//using ModelType = RTNeural::ModelT<float, 1, 1, RTNeural::LSTMLayerT<float, 1, 32>, RTNeural::DenseT<float, 32, 1>>;
+using ModelType = RTNeural::ModelT<float, 1, 1, RTNeural::LSTMLayerT<float, 1, 32>, RTNeural::DenseT<float, 32, 1>>;
 
 //==============================================================================
 /**
@@ -111,7 +111,7 @@ private:
     double ampMax;
     bool powerState;
 
-    ModelType model;
+    ModelType models[2];
 
     float magicKnobValue;
 
