@@ -1,5 +1,4 @@
 instructions.*
-.DS_Store
 .vscode
 .cache
 build/
@@ -8,8 +7,12 @@ MagicKnob/build/
 MagicKnob/.vscode/
 MagicKnob/__pycache/
 MagicKnob/python/__pycache__
+MagicKnob/tensorflow/__pycache__
 MagicKnob/python/runs
 MagicKnob/runs/
 MagicKnob/CMakeLists.txt
 MagicKnob/.tmp.drivedownload
 MagicKnob/.tmp.driveupload
+
+**/.DS_Store
+**/Icon?

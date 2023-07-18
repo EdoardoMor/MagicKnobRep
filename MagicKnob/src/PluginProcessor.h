@@ -9,9 +9,8 @@
 #pragma once
 
 // not this:
-//#include <JuceHeader.h>
+// #include <JuceHeader.h>
 // but this:
-
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_utils/juce_audio_utils.h>
@@ -38,84 +37,80 @@
 #include <filesystem>
 #include <RTNeural/RTNeural.h>
 
-//using ModelType = RTNeural::ModelT<float, 2, 1, RTNeural::LSTMLayerT<float, 2, 32>, RTNeural::DenseT<float, 32, 1>>;
+struct prediction{
+  int channel;
+  float modelOutput;
+};
+
+// using ModelType = RTNeural::ModelT<float, 2, 1, RTNeural::LSTMLayerT<float, 2, 32>, RTNeural::DenseT<float, 32, 1>>;
 
 using ModelType = RTNeural::ModelT<float, 1, 1, RTNeural::LSTMLayerT<float, 1, 32>, RTNeural::DenseT<float, 32, 1>>;
 
 //==============================================================================
 /**
-*/
-class MagicKnobProcessor  : public juce::AudioProcessor
-                            #if JucePlugin_Enable_ARA
-                             , public juce::AudioProcessorARAExtension
-                            #endif
+ */
+class MagicKnobProcessor : public juce::AudioProcessor
+#if JucePlugin_Enable_ARA
+    ,
+                           public juce::AudioProcessorARAExtension
+#endif
 {
 public:
-    //==============================================================================
-    MagicKnobProcessor();
-    ~MagicKnobProcessor() override;
+  //==============================================================================
+  MagicKnobProcessor();
+  ~MagicKnobProcessor() override;
 
-    //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
-    void releaseResources() override;
+  //==============================================================================
+  void prepareToPlay(double sampleRate, int samplesPerBlock) override;
+  void releaseResources() override;
 
-   #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-   #endif
+#ifndef JucePlugin_PreferredChannelConfigurations
+  bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
+#endif
 
-    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+  void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
 
-    //==============================================================================
-    juce::AudioProcessorEditor* createEditor() override;
-    bool hasEditor() const override;
+  //==============================================================================
+  juce::AudioProcessorEditor *createEditor() override;
+  bool hasEditor() const override;
 
-    //==============================================================================
-    const juce::String getName() const override;
+  //==============================================================================
+  const juce::String getName() const override;
 
-    bool acceptsMidi() const override;
-    bool producesMidi() const override;
-    bool isMidiEffect() const override;
-    double getTailLengthSeconds() const override;
+  bool acceptsMidi() const override;
+  bool producesMidi() const override;
+  bool isMidiEffect() const override;
+  double getTailLengthSeconds() const override;
 
-    //==============================================================================
-    int getNumPrograms() override;
-    int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const juce::String getProgramName (int index) override;
-    void changeProgramName (int index, const juce::String& newName) override;
+  //==============================================================================
+  int getNumPrograms() override;
+  int getCurrentProgram() override;
+  void setCurrentProgram(int index) override;
+  const juce::String getProgramName(int index) override;
+  void changeProgramName(int index, const juce::String &newName) override;
 
-    //==============================================================================
-    void getStateInformation (juce::MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
-    void updateFrequency(double newFreq);
+  //==============================================================================
+  void getStateInformation(juce::MemoryBlock &destData) override;
+  void setStateInformation(const void *data, int sizeInBytes) override;
 
-    void updateFMParams(double _modIndex, double _modDepth);
+  /** add some midi to be played at the sent sample offset*/
+  void addMidi(juce::MidiMessage msg, int sampleOffset);
 
-    /** add some midi to be played at the sent sample offset*/
-    void addMidi(juce::MidiMessage msg, int sampleOffset);
-    /** set env length in seconds*/
-    void setEnvLength(double envLengthSecs);
+  void loadModel(std::ifstream &jsonStream, ModelType &model);
 
-    void loadModel(std::ifstream& jsonStream, ModelType& model);
-
-    void setMagicKnobValue(float val);
-    void togglePowerState();
-    
+  void setMagicKnobValue(float val);
+  void togglePowerState();
 
 private:
+  bool powerState;
 
+  float magicKnobValue;
 
-    double amp;
-    double ampTarget;
-    double dAmp;  
-    double ampMax;
-    bool powerState;
+  std::string modelFilePath; // models
+  ModelType modelsT[2];
 
-    ModelType models[2];
+  prediction predict(const float *input, int channel);
 
-    float magicKnobValue;
-
-
-      //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MagicKnobProcessor)
+  //==============================================================================
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MagicKnobProcessor)
 };

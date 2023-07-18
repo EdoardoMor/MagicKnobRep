@@ -22,3 +22,5 @@ audio_logic_dist_par/*.wav
 !audio_logic_dist_par/*_BEST*.wav
 audio_lstm_delay/*.wav
 !audio_lstm_delay/*_BEST*.wav
+audio_ht1/*.wav
+!audio_ht1/*_BEST*.wav
