@@ -33,6 +33,19 @@ MagicKnobProcessor::MagicKnobProcessor()
 	// auto jsonInput = nlohmann::json::parse (jsonStream.readEntireStreamAsString().toStdString());
     // modelsT[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
     // modelsT[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
+
+	auto modelFilePath = "C:/PROGETTI/STMAE/MagicKnobRep/model_dist_2.json";
+    //assert(std::filesystem::exists(modelFilePath));
+
+    DBG("Loading model from path: "); 
+    DBG(modelFilePath);
+    
+    std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
+    loadModel(jsonStream, modelsT[0]);
+
+    auto modelFilePath2 = "C:/PROGETTI/STMAE/MagicKnobRep/model_dist_2.json";
+    std::ifstream jsonStream2(modelFilePath2, std::ifstream::binary);
+    loadModel(jsonStream2, modelsT[1]);
 }
 
 MagicKnobProcessor::~MagicKnobProcessor()
@@ -105,18 +118,6 @@ void MagicKnobProcessor::changeProgramName(int index, const juce::String &newNam
 void MagicKnobProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 
-    auto modelFilePath = "C:/PROGETTI/STMAE/MagicKnobRep/model_dist_2.json";
-    //assert(std::filesystem::exists(modelFilePath));
-
-    DBG("Loading model from path: "); 
-    DBG(modelFilePath);
-    
-    std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
-    loadModel(jsonStream, models[0]);
-
-    auto modelFilePath2 = "C:/PROGETTI/STMAE/MagicKnobRep/model_dist_2.json";
-    std::ifstream jsonStream2(modelFilePath2, std::ifstream::binary);
-    loadModel(jsonStream2, models[1]);
     modelsT[0].reset();
     modelsT[1].reset();
 
@@ -169,8 +170,6 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 	for (int i = numInChannels; i < getNumOutputChannels(); ++i)
 			buffer.clear(i, 0, buffer.getNumSamples());
 
-	if (powerState)
-	{
 		// std::vector<float *> data;
 		// for (int i = 0; i < numInChannels; ++i)
 		// 	data.push_back(buffer.getWritePointer(i));
@@ -197,21 +196,25 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
             auto* x = buffer.getWritePointer (ch);
             for (int n = 0; n < buffer.getNumSamples(); ++n)
             {
-                // DECOMMENTARE PER NET A 2 INPUT
-                float temp[2] = {channelData[i], magicKnobValue};
-                const float *inputArr = temp; 
-                channelData[i] = modelsT[channel].forward(inputArr);
-                
+				if (powerState)
+				{
+					// DECOMMENTARE PER NET A 2 INPUT
+					float temp[2] = { x[n], magicKnobValue };
+					const float* inputArr = temp;
+					x[n] = modelsT[ch].forward(inputArr);
 
-                /*
-                float input[] = { channelData[i] };
-                channelData[i] = models[channel].forward (input);
-                */
-            } else {
-                channelData[i] = channelData[i];
+
+					/*
+					float input[] = { x[n] };
+					x[n] = models[ch].forward (input);
+					*/
+				}
+				else {
+					x[n] = x[n];
+				}
             }
         }
-	}
+	
 
 	/*
 		  // now take the model for a spin :)
