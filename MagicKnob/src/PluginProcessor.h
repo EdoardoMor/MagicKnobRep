@@ -42,9 +42,23 @@ struct prediction{
   float modelOutput;
 };
 
-// using ModelType = RTNeural::ModelT<float, 2, 1, RTNeural::LSTMLayerT<float, 2, 32>, RTNeural::DenseT<float, 32, 1>>;
+//per model_dist (1 o 2) .json
+using ModelType = RTNeural::ModelT<float, 2, 1, RTNeural::LSTMLayerT<float, 2, 32>, RTNeural::DenseT<float, 32, 1>>;
 
-using ModelType = RTNeural::ModelT<float, 1, 1, RTNeural::LSTMLayerT<float, 1, 32>, RTNeural::DenseT<float, 32, 1>>;
+//per model.json
+//using ModelType = RTNeural::ModelT<float, 1, 1, RTNeural::LSTMLayerT<float, 1, 32>, RTNeural::DenseT<float, 32, 1>>;
+
+/*per neural_net_weights.json
+using ModelType = RTNeural::ModelT<float, 1, 1,
+        RTNeural::DenseT<float, 1, 8>,
+        RTNeural::TanhActivationT<float, 8>,
+        RTNeural::Conv1DT<float, 8, 4, 3, 2>,
+        RTNeural::TanhActivationT<float, 4>,
+        RTNeural::GRULayerT<float, 4, 8>,
+        RTNeural::DenseT<float, 8, 1>
+    >;
+    */
+
 
 //==============================================================================
 /**
