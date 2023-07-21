@@ -32,7 +32,7 @@ MagicKnobProcessor::MagicKnobProcessor()
     // modelsT[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
     // modelsT[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
 
-	modelFilePath = "/Users/macdonald/Desktop/MagicKnobRep/model_dist_2.json";
+	modelFilePath = "/Users/macdonald/Desktop/MagicKnobRep/model16.json";
     //assert(std::filesystem::exists(modelFilePath));
 
     DBG("Loading model from path: "); 
@@ -197,15 +197,12 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 				if (powerState)
 				{
 					// DECOMMENTARE PER NET A 2 INPUT
-					float temp[2] = { x[n], magicKnobValue };
-					const float* inputArr = temp;
-					x[n] = modelsT[ch].forward(inputArr);
+					// float temp[2] = { x[n], magicKnobValue };
+					// const float* inputArr = temp;
+					// x[n] = modelsT[ch].forward(inputArr);
 
-
-					/*
 					float input[] = { x[n] };
-					x[n] = models[ch].forward (input);
-					*/
+					x[n] = modelsT[ch].forward (input);
 				}
 				else {
 					x[n] = x[n];
