@@ -27,14 +27,12 @@ MagicKnobProcessor::MagicKnobProcessor()
 
 	  , powerState(false)
 {
-
-
 	// juce::MemoryInputStream jsonStream (BinaryData::tensorflow_model_json, BinaryData::tensorflow_model.jsonSize, false);
 	// auto jsonInput = nlohmann::json::parse (jsonStream.readEntireStreamAsString().toStdString());
     // modelsT[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
     // modelsT[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
 
-	auto modelFilePath = "C:/PROGETTI/STMAE/MagicKnobRep/model_dist_2.json";
+	modelFilePath = "/Users/macdonald/Desktop/MagicKnobRep/model_dist_2.json";
     //assert(std::filesystem::exists(modelFilePath));
 
     DBG("Loading model from path: "); 
@@ -43,9 +41,9 @@ MagicKnobProcessor::MagicKnobProcessor()
     std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
     loadModel(jsonStream, modelsT[0]);
 
-    auto modelFilePath2 = "C:/PROGETTI/STMAE/MagicKnobRep/model_dist_2.json";
-    std::ifstream jsonStream2(modelFilePath2, std::ifstream::binary);
-    loadModel(jsonStream2, modelsT[1]);
+    jsonStream.clear();
+	jsonStream.seekg (0, std::ios::beg);
+    loadModel(jsonStream, modelsT[1]);
 }
 
 MagicKnobProcessor::~MagicKnobProcessor()
