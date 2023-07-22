@@ -32,7 +32,7 @@ MagicKnobProcessor::MagicKnobProcessor()
     // modelsT[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
     // modelsT[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
 
-	modelFilePath = "/Users/macdonald/Desktop/MagicKnobRep/model16.json";
+	modelFilePath = "/Users/macdonald/Desktop/MagicKnobRep/model16_par_dist.json";
     //assert(std::filesystem::exists(modelFilePath));
 
     DBG("Loading model from path: "); 
@@ -197,12 +197,12 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 				if (powerState)
 				{
 					// DECOMMENTARE PER NET A 2 INPUT
-					// float temp[2] = { x[n], magicKnobValue };
-					// const float* inputArr = temp;
-					// x[n] = modelsT[ch].forward(inputArr);
+					float temp[2] = { x[n], magicKnobValue };
+					const float* inputArr = temp;
+					x[n] = modelsT[ch].forward(inputArr);
 
-					float input[] = { x[n] };
-					x[n] = modelsT[ch].forward (input);
+					// float input[] = { x[n] };
+					// x[n] = modelsT[ch].forward (input);
 				}
 				else {
 					x[n] = x[n];
@@ -277,7 +277,7 @@ void MagicKnobProcessor::loadModel(std::ifstream &jsonStream, ModelType &model)
 	std::string prefix = "lstm.";
 	// for LSTM layers, number of hidden  = number of params in a hidden weight set
 	// divided by 4
-	auto hidden_count = modelJson[prefix + ".weight_ih_l0"].size() / 4;
+	auto hidden_count = modelJson[prefix + "weight_ih_l0"].size() / 4;
 	// assert that the number of hidden units is the same as this count
 	// to ensure the json file we are importing matches the model we defined.
 	RTNeural::torch_helpers::loadLSTM<float>(modelJson, prefix, lstm);
@@ -295,4 +295,5 @@ void MagicKnobProcessor::setMagicKnobValue(float val)
 void MagicKnobProcessor::togglePowerState()
 {
 	powerState = !powerState;
+	std::cout << powerState << std::endl;
 }

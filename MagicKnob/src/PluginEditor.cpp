@@ -38,9 +38,6 @@ MagicKnobEditor::MagicKnobEditor (MagicKnobProcessor& p)
     superKnob.setSliderStyle(juce::Slider::RotaryHorizontalDrag);
     superKnob.setRange(0,1);
 
-   
-
-
 }
 
 MagicKnobEditor::~MagicKnobEditor()
@@ -52,7 +49,7 @@ void MagicKnobEditor::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     // g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-    g.fillAll (juce::Colours::lightgreen);
+    g.fillAll (juce::Colours::blue);
     
    // g.setColour (juce::Colours::white);
    // g.setFont (15.0f);
@@ -97,8 +94,7 @@ juce::AudioBuffer<float> MagicKnobEditor::getAudioBufferFromFile(juce::File file
 void MagicKnobEditor::buttonClicked(juce::Button* btn)
 {
     if (btn == &powerToggle){
-        if (powerToggle.getToggleState())
-            audioProcessor.togglePowerState();
+        audioProcessor.togglePowerState();
     }
 
 }
