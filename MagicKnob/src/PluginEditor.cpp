@@ -20,14 +20,19 @@
 
 //==============================================================================
 MagicKnobEditor::MagicKnobEditor (MagicKnobProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor(p)
+    : AudioProcessorEditor(&p), audioProcessor(p), tabs{ p }
 
 {    
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
+
+    setOpaque(true);
+    addAndMakeVisible(tabs);
+
     setSize (500, 500);
 
+    /*
     addAndMakeVisible(powerToggle);
     powerToggle.setButtonText("ON/OFF");
     powerToggle.addListener(this);
@@ -37,6 +42,14 @@ MagicKnobEditor::MagicKnobEditor (MagicKnobProcessor& p)
     superKnob.addListener(this);
     superKnob.setSliderStyle(juce::Slider::RotaryHorizontalDrag);
     superKnob.setRange(0,1);
+
+    */
+
+    
+
+    //knobpage = new KnobPage(p);
+
+    //tabs = new OurTabbedComponent(p);
 
 }
 
@@ -49,7 +62,7 @@ void MagicKnobEditor::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     // g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-    g.fillAll (juce::Colours::blue);
+    g.fillAll (juce::Colours::lightgreen);
     
    // g.setColour (juce::Colours::white);
    // g.setFont (15.0f);
@@ -61,13 +74,19 @@ void MagicKnobEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
+    /*
     float rowHeight = getHeight()/5; 
     powerToggle.setBounds(0, 0, getWidth()/2, rowHeight);
     superKnob.setBounds(getWidth()/2, 0, getWidth()/2, rowHeight);
+    */
+
+    tabs.setBounds(getLocalBounds().reduced(4));
 
     
 }
 
+
+/*
  void MagicKnobEditor::sliderValueChanged (juce::Slider *slider)
 {
 
@@ -76,6 +95,8 @@ void MagicKnobEditor::resized()
         audioProcessor.setMagicKnobValue(slider->getValue());
     }
 }
+
+*/
 
 /*
 juce::AudioBuffer<float> MagicKnobEditor::getAudioBufferFromFile(juce::File file)
@@ -91,6 +112,8 @@ juce::AudioBuffer<float> MagicKnobEditor::getAudioBufferFromFile(juce::File file
     
 }
 */
+
+ /*
 void MagicKnobEditor::buttonClicked(juce::Button* btn)
 {
     if (btn == &powerToggle){
@@ -98,5 +121,7 @@ void MagicKnobEditor::buttonClicked(juce::Button* btn)
     }
 
 }
+
+*/
 
 
