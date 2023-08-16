@@ -24,3 +24,5 @@ audio_lstm_delay/*.wav
 !audio_lstm_delay/*_BEST*.wav
 audio_ht1/*.wav
 !audio_ht1/*_BEST*.wav
+audio_lstm_lpf2_par/*.wav
+!audio_lstm_lpf2_par/*_BEST*.wav
