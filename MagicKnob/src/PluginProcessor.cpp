@@ -29,21 +29,30 @@ MagicKnobProcessor::MagicKnobProcessor()
 {
 	// juce::MemoryInputStream jsonStream (BinaryData::tensorflow_model_json, BinaryData::tensorflow_model.jsonSize, false);
 	// auto jsonInput = nlohmann::json::parse (jsonStream.readEntireStreamAsString().toStdString());
-    // modelsT[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
-    // modelsT[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
+    // modelsDist[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
+    // modelsDist[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
 
-	modelFilePath = "/Users/macdonald/Desktop/MagicKnobRep/model16_par_dist.json";
+	modelFilePath = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_dist.json";
+	modelFilePath2 = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_lpf2.json";
+
     //assert(std::filesystem::exists(modelFilePath));
 
     DBG("Loading model from path: "); 
     DBG(modelFilePath);
     
     std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
-    loadModel(jsonStream, modelsT[0]);
+    loadModel(jsonStream, modelsDist[0]);
 
     jsonStream.clear();
 	jsonStream.seekg (0, std::ios::beg);
-    loadModel(jsonStream, modelsT[1]);
+    loadModel(jsonStream, modelsDist[1]);
+
+	std::ifstream jsonStream2(modelFilePath2, std::ifstream::binary);
+    loadModel(jsonStream2, modelsLPF[0]);
+
+    jsonStream2.clear();
+	jsonStream2.seekg (0, std::ios::beg);
+    loadModel(jsonStream2, modelsLPF[1]);
 }
 
 MagicKnobProcessor::~MagicKnobProcessor()
@@ -116,8 +125,10 @@ void MagicKnobProcessor::changeProgramName(int index, const juce::String &newNam
 void MagicKnobProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 
-    modelsT[0].reset();
-    modelsT[1].reset();
+    modelsDist[0].reset();
+    modelsDist[1].reset();
+	modelsLPF[0].reset();
+    modelsLPF[1].reset();
 
 
 }
@@ -199,10 +210,14 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 					// DECOMMENTARE PER NET A 2 INPUT
 					float temp[2] = { x[n], magicKnobValue };
 					const float* inputArr = temp;
-					x[n] = modelsT[ch].forward(inputArr);
+					x[n] = modelsDist[ch].forward(inputArr);
+
+					float tempLpf[2] = { x[n], magicKnobValue};
+					const float* inputArrLpf = tempLpf;
+					x[n] = modelsLPF[ch].forward(inputArrLpf);
 
 					// float input[] = { x[n] };
-					// x[n] = modelsT[ch].forward (input);
+					// x[n] = modelsDist[ch].forward (input);
 				}
 				else {
 					x[n] = x[n];
@@ -228,7 +243,7 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 prediction MagicKnobProcessor::predict(const float *input, int channel)
 {
 	prediction result;
-	result.modelOutput = modelsT[channel].forward(input);
+	result.modelOutput = modelsDist[channel].forward(input);
 	result.channel = channel;
 	return result;
 }
