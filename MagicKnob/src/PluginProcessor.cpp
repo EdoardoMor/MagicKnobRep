@@ -130,7 +130,6 @@ void MagicKnobProcessor::changeProgramName(int index, const juce::String &newNam
 //==============================================================================
 void MagicKnobProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-
 	modelsDist[0].reset();
 	modelsDist[1].reset();
 
@@ -192,7 +191,7 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 	// {
 
 	// 	/* DECOMMENTARE PER NET A 2 INPUT
-	// 	float temp[2] = {channelData[i], magicKnobValue};
+	// 	float temp[2] = {channelData[i], superKnobValue};
 	// 	const float *inputArr = temp;
 	// 	channelData[i] = model.forward(inputArr);
 	// 	*/
@@ -212,15 +211,16 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 		{
 			if (powerState)
 			{
-				// DECOMMENTARE PER NET A 2 INPUT
-				float tempDist[2] = {x[n], magicKnobValue};
+				// NET A 2 INPUT
+				float tempDist[2] = {x[n], distKnobValue};
 				const float *inputArr = tempDist;
 				x[n] = modelsDist[ch].forward(inputArr);
 
-				float tempLpf[2] = {x[n], magicKnobValue};
+				float tempLpf[2] = {x[n], lpfKnobValue};
 				const float *inputArrLpf = tempLpf;
 				x[n] = modelsLPF[ch].forward(inputArrLpf);
 
+				// NET A 1 INPUT
 				// float input[] = { x[n] };
 				// x[n] = modelsDist[ch].forward (input);
 			}
@@ -232,13 +232,13 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 	}
 }
 
-prediction MagicKnobProcessor::predict(const float *input, int channel)
-{
-	prediction result;
-	result.modelOutput = modelsDist[channel].forward(input);
-	result.channel = channel;
-	return result;
-}
+// prediction MagicKnobProcessor::predict(const float *input, int channel)
+// {
+// 	prediction result;
+// 	result.modelOutput = modelsDist[channel].forward(input);
+// 	result.channel = channel;
+// 	return result;
+// }
 
 //==============================================================================
 bool MagicKnobProcessor::hasEditor() const
@@ -294,9 +294,14 @@ void MagicKnobProcessor::loadModel(std::ifstream &jsonStream, ModelType &model)
 	RTNeural::torch_helpers::loadDense<float>(modelJson, "dense.", dense);
 }
 
-void MagicKnobProcessor::setMagicKnobValue(float val)
+void MagicKnobProcessor::setDistKnobValue(float val)
 {
-	magicKnobValue = val;
+	distKnobValue = val;
+}
+
+void MagicKnobProcessor::setLPFKnobValue(float val)
+{
+	lpfKnobValue = val;
 }
 
 void MagicKnobProcessor::togglePowerState()
