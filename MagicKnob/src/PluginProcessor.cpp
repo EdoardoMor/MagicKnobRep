@@ -25,34 +25,40 @@ MagicKnobProcessor::MagicKnobProcessor()
 						 )
 #endif
 
-	  , powerState(false)
+	  ,
+	  powerState(false)
 {
 	// juce::MemoryInputStream jsonStream (BinaryData::tensorflow_model_json, BinaryData::tensorflow_model.jsonSize, false);
 	// auto jsonInput = nlohmann::json::parse (jsonStream.readEntireStreamAsString().toStdString());
-    // modelsDist[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
-    // modelsDist[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
+	// modelsDist[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
+	// modelsDist[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
 
-	modelFilePath = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_dist.json";
-	modelFilePath2 = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_lpf2.json";
+	// modelFilePathDist = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_dist.json";
+	// modelFilePathLPF = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_lpf2.json";
 
-    //assert(std::filesystem::exists(modelFilePath));
+	modelFilePathDist = "/Users/macdonald/Desktop/MagicKnobRep/model16_par_dist.json";
+	modelFilePathLPF = "/Users/macdonald/Desktop/MagicKnobRep/model16_par_lpf2.json";
 
-    DBG("Loading model from path: "); 
-    DBG(modelFilePath);
-    
-    std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
-    loadModel(jsonStream, modelsDist[0]);
+	assert(std::filesystem::exists(modelFilePathDist));
+	assert(std::filesystem::exists(modelFilePathDist));
 
-    jsonStream.clear();
-	jsonStream.seekg (0, std::ios::beg);
-    loadModel(jsonStream, modelsDist[1]);
+	std::cout << "Loading model at path: " << modelFilePathDist << std::endl;
 
-	std::ifstream jsonStream2(modelFilePath2, std::ifstream::binary);
-    loadModel(jsonStream2, modelsLPF[0]);
+	std::ifstream jsonStreamDist(modelFilePathDist, std::ifstream::binary);
+	loadModel(jsonStreamDist, modelsDist[0]);
 
-    jsonStream2.clear();
-	jsonStream2.seekg (0, std::ios::beg);
-    loadModel(jsonStream2, modelsLPF[1]);
+	jsonStreamDist.clear();
+	jsonStreamDist.seekg(0, std::ios::beg);
+	loadModel(jsonStreamDist, modelsDist[1]);
+
+	std::cout << "Loading model at path: " << modelFilePathLPF << std::endl;
+
+	std::ifstream jsonStreamLPF(modelFilePathLPF, std::ifstream::binary);
+	loadModel(jsonStreamLPF, modelsLPF[0]);
+
+	jsonStreamLPF.clear();
+	jsonStreamLPF.seekg(0, std::ios::beg);
+	loadModel(jsonStreamLPF, modelsLPF[1]);
 }
 
 MagicKnobProcessor::~MagicKnobProcessor()
@@ -125,12 +131,11 @@ void MagicKnobProcessor::changeProgramName(int index, const juce::String &newNam
 void MagicKnobProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 
-    modelsDist[0].reset();
-    modelsDist[1].reset();
+	modelsDist[0].reset();
+	modelsDist[1].reset();
+
 	modelsLPF[0].reset();
-    modelsLPF[1].reset();
-
-
+	modelsLPF[1].reset();
 }
 
 void MagicKnobProcessor::releaseResources()
@@ -175,69 +180,56 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 	// this code if your algorithm already fills all the output channels.
 
 	auto numInChannels = getNumInputChannels();
-	
+
 	for (int i = numInChannels; i < getNumOutputChannels(); ++i)
-			buffer.clear(i, 0, buffer.getNumSamples());
+		buffer.clear(i, 0, buffer.getNumSamples());
 
-		// std::vector<float *> data;
-		// for (int i = 0; i < numInChannels; ++i)
-		// 	data.push_back(buffer.getWritePointer(i));
+	// std::vector<float *> data;
+	// for (int i = 0; i < numInChannels; ++i)
+	// 	data.push_back(buffer.getWritePointer(i));
 
-		// for (int i = 0; i < buffer.getNumSamples(); ++i)
-		// {
+	// for (int i = 0; i < buffer.getNumSamples(); ++i)
+	// {
 
-		// 	/* DECOMMENTARE PER NET A 2 INPUT
-		// 	float temp[2] = {channelData[i], magicKnobValue};
-		// 	const float *inputArr = temp;
-		// 	channelData[i] = model.forward(inputArr);
-		// 	*/
+	// 	/* DECOMMENTARE PER NET A 2 INPUT
+	// 	float temp[2] = {channelData[i], magicKnobValue};
+	// 	const float *inputArr = temp;
+	// 	channelData[i] = model.forward(inputArr);
+	// 	*/
 
-		// 	int channel = 0;
-		// 	for (auto channelData : data)
-		// 	{
-		// 		auto res1 = std::async(this->predict, &channelData[i], channel);
-		// 	}
-		// }
+	// 	int channel = 0;
+	// 	for (auto channelData : data)
+	// 	{
+	// 		auto res1 = std::async(this->predict, &channelData[i], channel);
+	// 	}
+	// }
 
-		// use compile-time model
-        for (int ch = 0; ch < numInChannels; ++ch)
-        {
-            auto* x = buffer.getWritePointer (ch);
-            for (int n = 0; n < buffer.getNumSamples(); ++n)
-            {
-				if (powerState)
-				{
-					// DECOMMENTARE PER NET A 2 INPUT
-					float temp[2] = { x[n], magicKnobValue };
-					const float* inputArr = temp;
-					x[n] = modelsDist[ch].forward(inputArr);
+	// use compile-time model
+	for (int ch = 0; ch < numInChannels; ++ch)
+	{
+		auto *x = buffer.getWritePointer(ch);
+		for (int n = 0; n < buffer.getNumSamples(); ++n)
+		{
+			if (powerState)
+			{
+				// DECOMMENTARE PER NET A 2 INPUT
+				float tempDist[2] = {x[n], magicKnobValue};
+				const float *inputArr = tempDist;
+				x[n] = modelsDist[ch].forward(inputArr);
 
-					float tempLpf[2] = { x[n], magicKnobValue};
-					const float* inputArrLpf = tempLpf;
-					x[n] = modelsLPF[ch].forward(inputArrLpf);
+				float tempLpf[2] = {x[n], magicKnobValue};
+				const float *inputArrLpf = tempLpf;
+				x[n] = modelsLPF[ch].forward(inputArrLpf);
 
-					// float input[] = { x[n] };
-					// x[n] = modelsDist[ch].forward (input);
-				}
-				else {
-					x[n] = x[n];
-				}
-            }
-        }
-	
-
-	/*
-		  // now take the model for a spin :)
-	  std::vector<float> inputs {1.0, 2.0, 3.0, 4.0};
-	  std::vector<float> outputs {};
-	  outputs.resize(inputs.size(), {});
-
-	  for(size_t i = 0; i < inputs.size(); ++i)
-	  {
-		  outputs[i] = model.forward(&inputs[i]);
-		  std::cout << "in " << inputs[i] << " out: " << outputs[i] << std::endl;
-	  }
-	*/
+				// float input[] = { x[n] };
+				// x[n] = modelsDist[ch].forward (input);
+			}
+			else
+			{
+				x[n] = x[n];
+			}
+		}
+	}
 }
 
 prediction MagicKnobProcessor::predict(const float *input, int channel)

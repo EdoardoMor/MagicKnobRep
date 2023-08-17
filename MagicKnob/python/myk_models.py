@@ -50,6 +50,7 @@ class SimpleLSTM(torch.nn.Module):
             self.drop_hidden = False
         else:
             x, _ = self.lstm(torch_in)
+            x += torch_in
 
         return self.dense(x)
     

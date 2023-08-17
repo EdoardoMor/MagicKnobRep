@@ -120,10 +120,8 @@ private:
 
   float magicKnobValue;
 
-  std::string modelFilePath; // models
-  std::string modelFilePath2; // models
-  ModelType modelsDist[2];
-  ModelType modelsLPF[2];
+  std::string modelFilePathDist, modelFilePathLPF; // models
+  ModelType modelsDist[2], modelsLPF[2];
 
   prediction predict(const float *input, int channel);
 
