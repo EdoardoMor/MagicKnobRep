@@ -211,6 +211,8 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 		{
 			if (powerState)
 			{
+				std::cout << "DIST: " << distKnobValue << " LPF: " << lpfKnobValue << std::endl;
+
 				// NET A 2 INPUT
 				float tempDist[2] = {x[n], distKnobValue};
 				const float *inputArr = tempDist;

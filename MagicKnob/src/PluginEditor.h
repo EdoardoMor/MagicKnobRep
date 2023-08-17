@@ -16,9 +16,11 @@
 #include <torch/torch.h>
 #include <torch/script.h>
 #include <iostream>
+#include <format>
 #include <cmath>
 
 #include "PluginProcessor.h"
+#include "NeuralNetwork.h"
 
 // KNOBPAGE ------|------|------|------|------|------|------|------|------|------|------|------|
 class KnobPage : public juce::Component, public juce::Button::Listener, public juce::Slider::Listener
@@ -70,15 +72,25 @@ public:
         addAndMakeVisible(powerToggle);
         powerToggle.setButtonText("ON/OFF");
         powerToggle.addListener(this);
+
+        addAndMakeVisible(trainButton);
+        trainButton.addListener(this);
+        trainButton.setButtonText("Train SuperKnob");
+        trainButton.setEnabled(false);
+
+        addAndMakeVisible(addSampleButton);
+        addSampleButton.addListener(this);
+        addSampleButton.setButtonText("Add training datapoint");
     }
 
     void resized() override
     {
         // This is generally where you'll want to lay out the positions of any
         // subcomponents in your editor..
-        float rowHeight = getHeight() / 2;
-        float columnWidth = getWidth() / 2;
-        float labelHeight = 20;
+        int rowHeight = (int)getHeight() / 2;
+        int columnWidth = (int)getWidth() / 2;
+        int labelHeight = 20;
+        int buttonHeight = (int)rowHeight / 3;
 
         // first row
         superKnob.setBounds(0, 0, columnWidth, rowHeight);
@@ -87,7 +99,9 @@ public:
         distKnobLabel.setBounds(columnWidth, rowHeight / 2 - labelHeight, columnWidth, labelHeight);
 
         // second row
-        powerToggle.setBounds(0, rowHeight, columnWidth, rowHeight);
+        powerToggle.setBounds(0, rowHeight, columnWidth, buttonHeight);
+        addSampleButton.setBounds(0, rowHeight + buttonHeight, columnWidth, buttonHeight);
+        trainButton.setBounds(0, rowHeight + 2 * buttonHeight, columnWidth, buttonHeight);
         lpfKnob.setBounds(columnWidth, rowHeight, columnWidth, rowHeight);
         lpfKnobLabel.setBounds(columnWidth, rowHeight * 3 / 2 - labelHeight, columnWidth, labelHeight);
     }
@@ -98,10 +112,15 @@ public:
 
         if (slider == &superKnob)
         {
-            audioProc.setDistKnobValue(read);
-            distKnob.setValue(read);
-            audioProc.setLPFKnobValue(read);
-            lpfKnob.setValue(read);
+            if (nn.isTrained())
+            {
+                // set values of other sliders using the NN
+                std::vector<float> nn_outs = nn.forward(std::vector<float>{(float)superKnob.getValue()});
+                distKnob.setValue(nn_outs[0]);
+                lpfKnob.setValue(nn_outs[1]);
+            }
+            // distKnob.setValue(read);
+            // lpfKnob.setValue(read);
         }
         if (slider == &distKnob)
             audioProc.setDistKnobValue(read);
@@ -116,8 +135,32 @@ public:
     void buttonClicked(juce::Button *btn) override
     {
         if (btn == &powerToggle)
-        {
             audioProc.togglePowerState();
+        if (btn == &addSampleButton)
+        {
+            float in = (float)superKnob.getValue();
+            float outDist = (float)distKnob.getValue();
+            float outLPF = (float)lpfKnob.getValue();
+            std::cout << "Superknob: " << in << "\nDist: " << outDist << "\nLPF: " << outLPF << std::endl
+                      << std::endl;
+            nn.addTrainingData({in}, {outDist, outLPF});
+            trainButton.setEnabled(true);
+        }
+        if (btn == &trainButton)
+        {
+            if (!nn.isTrained())
+            {
+                nn.runTraining(1000000);
+                trainButton.setButtonText("Reset SuperKnob");
+            }
+            else
+            {
+                std::cout << nn.isTrained() << std::endl;
+                this->nn = NeuralNetwork(1, 2);
+                std::cout << nn.isTrained() << std::endl;
+                trainButton.setButtonText("Train SuperKnob");
+                trainButton.setEnabled(false);
+            }
         }
     }
 
@@ -125,7 +168,9 @@ private:
     juce::Label superKnobLabel, distKnobLabel, lpfKnobLabel;
     juce::Slider superKnob, distKnob, lpfKnob;
     juce::ToggleButton powerToggle;
+    juce::TextButton trainButton, addSampleButton;
 
+    NeuralNetwork nn{1, 2};
     MagicKnobProcessor &audioProc;
 };
 
@@ -167,8 +212,6 @@ private:
     MagicKnobProcessor &audioProcessor;
 
     OurTabbedComponent tabs;
-    // KnobPage* knobpage;
-    // juce::Component RectPage;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MagicKnobEditor)
 };

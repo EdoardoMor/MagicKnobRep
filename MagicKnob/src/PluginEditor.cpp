@@ -13,8 +13,8 @@
 #include <torch/torch.h>
 #include <torch/script.h>
 #include <cmath>
-#include <chrono>
-#include <thread>
+// #include <chrono>
+// #include <thread>
 
 //==============================================================================
 MagicKnobEditor::MagicKnobEditor(MagicKnobProcessor &p)
@@ -74,41 +74,3 @@ void MagicKnobEditor::resized()
 
     tabs.setBounds(getLocalBounds().reduced(4));
 }
-
-/*
- void MagicKnobEditor::sliderValueChanged (juce::Slider *slider)
-{
-
-    if (slider == &superKnob){
-
-        audioProcessor.setSuperKnobValue(slider->getValue());
-    }
-}
-
-*/
-
-/*
-juce::AudioBuffer<float> MagicKnobEditor::getAudioBufferFromFile(juce::File file)
-{
-
-    //juce::AudioFormatManager formatManager - declared in header...`;
-    auto* reader = formatManager.createReaderFor(file);
-    juce::AudioBuffer<float> audioBuffer;
-    audioBuffer.setSize(reader->numChannels, reader->lengthInSamples);
-    reader->read(&audioBuffer, 0, reader->lengthInSamples, 0, true, true);
-    delete reader;
-    return audioBuffer;
-
-}
-*/
-
-/*
-void MagicKnobEditor::buttonClicked(juce::Button* btn)
-{
-   if (btn == &powerToggle){
-       audioProcessor.togglePowerState();
-   }
-
-}
-
-*/
