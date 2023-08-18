@@ -22,9 +22,38 @@
 #include "PluginProcessor.h"
 #include "NeuralNetwork.h"
 
-// KNOBPAGE ------|------|------|------|------|------|------|------|------|------|------|------|
-class KnobPage : public juce::Component, public juce::Button::Listener, public juce::Slider::Listener
+//==============================================================================
+/**
+*/
+class Area : public juce::TextButton
 {
+public:
+
+    Area(MagicKnobProcessor& proc) : TextButton(), audioProc(proc) 
+    {
+    }
+    
+    void mouseMove(const juce::MouseEvent& e) override
+
+    {
+        float x = (float) e.getPosition().getX() / 440.0;
+        float y = (float) e.getPosition().getY() / 195.0;
+        DBG(x);
+        DBG(y);
+
+        audioProc.setLPFKnobValue(x);
+        audioProc.setDistKnobValue(y);
+
+    }
+
+
+private:
+    MagicKnobProcessor& audioProc;
+
+};
+
+// KNOBPAGE ------|------|------|------|------|------|------|------|------|------|------|------|
+class KnobPage : public juce::Component, public juce::Button::Listener, public juce::Slider::Listener {
 
 public:
     KnobPage(MagicKnobProcessor &proc) : audioProc(proc)
@@ -174,14 +203,60 @@ private:
     MagicKnobProcessor &audioProc;
 };
 
+class RectPage : public juce::Component, public juce::Button::Listener {
+
+public:
+    RectPage(MagicKnobProcessor& proc) : audioProc(proc), area(proc) {
+
+        setSize(500, 500);
+
+        addAndMakeVisible(area);
+        //area.addListener(this);
+        area.setName("area");
+
+        addAndMakeVisible(powerToggle);
+        powerToggle.setButtonText("ON/OFF");
+        powerToggle.addListener(this);
+    }
+
+    void resized() override
+    {
+        // This is generally where you'll want to lay out the positions of any
+        // subcomponents in your editor..
+        float rowHeight = getHeight() / 5;
+        powerToggle.setBounds(0, 0, getWidth() / 2, rowHeight);
+        area.setBounds(10, 150 , getWidth() - 20, rowHeight * 2);
+
+    }
+
+    void buttonClicked(juce::Button* btn) override
+    {
+        if (btn == &powerToggle) {
+            audioProc.togglePowerState();
+        }
+
+    }
+
+
+
+
+private:
+    Area area;
+    juce::ToggleButton powerToggle;
+
+    MagicKnobProcessor& audioProc;
+
+};
+
+
 // TAB COMPONTENT   ------|------|------|------|------|------|------|------|------|------|------|
-class OurTabbedComponent : public juce::TabbedComponent
-{
+class OurTabbedComponent : public juce::TabbedComponent {
 
 public:
     OurTabbedComponent(MagicKnobProcessor &proc) : TabbedComponent(juce::TabbedButtonBar::TabsAtRight), audioP(proc)
     {
         addTab("KnobPage", juce::Colours::indianred, new KnobPage(proc), true);
+        addTab("RectPage", juce::Colours::indianred, new RectPage(proc), true);
     }
 
 private:
