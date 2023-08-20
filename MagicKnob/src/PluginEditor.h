@@ -25,31 +25,72 @@
 //==============================================================================
 /**
 */
+
+class Dot  : public juce::Component
+{
+public:
+    Dot () :
+
+          colour (juce::Colours::white)
+    {
+        setSize (10, 10);
+        step(0 , 0);
+        setAlwaysOnTop(false);
+    }
+
+    void step(int x, int y)
+    {
+
+        setCentrePosition (x, y);
+    }
+
+    void paint (juce::Graphics& g) override
+    {
+        g.setColour (colour);
+        g.fillEllipse (0, 0, (float) getWidth() , (float) getHeight() );
+
+        g.setColour (juce::Colours::darkgrey);
+        g.drawEllipse (0, 0, (float) getWidth() , (float) getHeight() , 0.5f);
+    }
+
+
+private:
+    juce::Point<float> position, speed;
+    juce::Colour colour;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Dot)
+};
+
 class Area : public juce::TextButton
 {
 public:
 
-    Area(MagicKnobProcessor& proc) : TextButton(), audioProc(proc) 
+    Area(MagicKnobProcessor& proc) : TextButton(), audioProc(proc), dot{} 
     {
+        addAndMakeVisible(dot);
     }
     
     void mouseMove(const juce::MouseEvent& e) override
 
     {
-        float x = (float) e.getPosition().getX() / 440.0;
-        float y = (float) e.getPosition().getY() / 195.0;
+        float eX = (float) e.getPosition().getX();
+        float eY = (float) e.getPosition().getY();
+        float x = eX / 440.0;
+        float y = eY / 195.0;
         DBG(x);
         DBG(y);
 
         audioProc.setLPFKnobValue(x);
         audioProc.setDistKnobValue(y);
 
+        dot.step(eX, eY);
+
     }
 
 
 private:
     MagicKnobProcessor& audioProc;
-
+    Dot dot;
 };
 
 // KNOBPAGE ------|------|------|------|------|------|------|------|------|------|------|------|
