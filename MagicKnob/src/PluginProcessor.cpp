@@ -33,11 +33,11 @@ MagicKnobProcessor::MagicKnobProcessor()
 	// modelsDist[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
 	// modelsDist[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
 
-	modelFilePathDist = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_dist.json";
-	modelFilePathLPF = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_lpf2.json";
+	// modelFilePathDist = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_dist.json";
+	// modelFilePathLPF = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_lpf2.json";
 
-	//modelFilePathDist = "/Users/macdonald/Desktop/MagicKnobRep/model16_par_dist.json";
-	//modelFilePathLPF = "/Users/macdonald/Desktop/MagicKnobRep/model16_par_lpf2.json";
+	modelFilePathDist = "/Users/macdonald/Desktop/MagicKnobRep/model16_par_dist.json";
+	modelFilePathLPF = "/Users/macdonald/Desktop/MagicKnobRep/model16_par_lpf2.json";
 
 	//assert(std::filesystem::exists(modelFilePathDist));
 	//assert(std::filesystem::exists(modelFilePathDist));

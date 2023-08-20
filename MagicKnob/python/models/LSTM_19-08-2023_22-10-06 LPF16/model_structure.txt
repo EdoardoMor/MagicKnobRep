@@ -1,0 +1,4 @@
+SimpleLSTM(
+  (lstm): LSTM(2, 16, batch_first=True)
+  (dense): Linear(in_features=16, out_features=1, bias=True)
+)total params: 1297
