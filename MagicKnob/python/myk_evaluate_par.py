@@ -5,7 +5,6 @@ import numpy as np
 
 
 def add_param(indat, param):
-
     newdat = np.empty([len(indat), 2])
     newdat[:, 0] = np.squeeze(indat)
     newdat[:, 1] = param
