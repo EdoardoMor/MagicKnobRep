@@ -25,35 +25,46 @@ MagicKnobProcessor::MagicKnobProcessor()
 						 )
 #endif
 
-	  ,
-	  powerState(false)
+	  , powerState(false), currModel(0)
 {
 	// juce::MemoryInputStream jsonStream (BinaryData::tensorflow_model_json, BinaryData::tensorflow_model.jsonSize, false);
 	// auto jsonInput = nlohmann::json::parse (jsonStream.readEntireStreamAsString().toStdString());
 	// modelsDist[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
 	// modelsDist[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
 
-	// modelFilePathDist = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_dist.json";
-	// modelFilePathLPF = "C:/PROGETTI/STMAE/MagicKnobRep/model16_par_lpf2.json";
+	// modelFolder = "C:/PROGETTI/STMAE/MagicKnobRep/final_models/"
+	modelFolder = "/Users/macdonald/Desktop/MagicKnobRep/final_models/";
 
-	modelFilePathDist = "/Users/macdonald/Desktop/MagicKnobRep/model16_par_dist.json";
-	modelFilePathLPF = "/Users/macdonald/Desktop/MagicKnobRep/model16_par_lpf2.json";
+	distModelFolder = "model16_par_dist.json";
+	lpfModelFolder = "model16_par_lpf2.json";
+	distInvModelFolder = "model16_par_dist_inv.json";
+	distVShapeModelFolder = "model16_par_dist_vshape.json";
+	distRandomModelFolder = "model16_par_dist_random.json";
+	distSinModelFolder = "model16_par_dist_sin.json";
 
-	//assert(std::filesystem::exists(modelFilePathDist));
-	//assert(std::filesystem::exists(modelFilePathDist));
+	distModelFiles.push_back(distModelFolder);
+	distModelFiles.push_back(distInvModelFolder);
+	distModelFiles.push_back(distVShapeModelFolder);
+	distModelFiles.push_back(distRandomModelFolder);
+	distModelFiles.push_back(distSinModelFolder);
 
-	std::cout << "Loading model at path: " << modelFilePathDist << std::endl;
+	// TODO assert exists
 
-	std::ifstream jsonStreamDist(modelFilePathDist, std::ifstream::binary);
+	//assert(std::filesystem::exists(distModelFolder));
+	//assert(std::filesystem::exists(distModelFolder));
+
+	std::cout << "Loading model at path: " << modelFolder + distModelFiles[0] << std::endl;
+
+	std::ifstream jsonStreamDist(modelFolder + distModelFiles[0], std::ifstream::binary);
 	loadModel(jsonStreamDist, modelsDist[0]);
 
 	jsonStreamDist.clear();
 	jsonStreamDist.seekg(0, std::ios::beg);
 	loadModel(jsonStreamDist, modelsDist[1]);
 
-	std::cout << "Loading model at path: " << modelFilePathLPF << std::endl;
+	std::cout << "Loading model at path: " << modelFolder + lpfModelFolder << std::endl;
 
-	std::ifstream jsonStreamLPF(modelFilePathLPF, std::ifstream::binary);
+	std::ifstream jsonStreamLPF(modelFolder + lpfModelFolder, std::ifstream::binary);
 	loadModel(jsonStreamLPF, modelsLPF[0]);
 
 	jsonStreamLPF.clear();
@@ -211,7 +222,7 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 		{
 			if (powerState)
 			{
-				std::cout << "DIST: " << distKnobValue << " LPF: " << lpfKnobValue << std::endl;
+				// std::cout << "DIST: " << distKnobValue << " LPF: " << lpfKnobValue << std::endl;
 
 				// NET A 2 INPUT
 				float tempDist[2] = {x[n], distKnobValue};
@@ -309,5 +320,22 @@ void MagicKnobProcessor::setLPFKnobValue(float val)
 void MagicKnobProcessor::togglePowerState()
 {
 	powerState = !powerState;
-	std::cout << powerState << std::endl;
+	// std::cout << powerState << std::endl;
+}
+
+void MagicKnobProcessor::changeDistortionModel()
+{
+	modelsDist[0].reset();
+	modelsDist[1].reset();
+
+	++currModel;
+
+	std::cout << modelFolder + distModelFiles[currModel % distModelFiles.size()] << std::endl;
+
+	std::ifstream jsonStreamDist(modelFolder + distModelFiles[currModel % distModelFiles.size()], std::ifstream::binary);
+	loadModel(jsonStreamDist, modelsDist[0]);
+
+	jsonStreamDist.clear();
+	jsonStreamDist.seekg(0, std::ios::beg);
+	loadModel(jsonStreamDist, modelsDist[1]);
 }

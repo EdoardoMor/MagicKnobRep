@@ -18,8 +18,6 @@ audio_lstm_lpf_par/*.wav
 !audio_lstm_lpf_par/*_BEST*.wav
 audio_logic_dist/*.wav
 !audio_logic_dist/*_BEST.wav
-audio_logic_dist_par/*.wav
-!audio_logic_dist_par/*_BEST*.wav
 audio_lstm_delay/*.wav
 !audio_lstm_delay/*_BEST*.wav
 audio_ht1/*.wav
@@ -28,3 +26,5 @@ audio_lstm_lpf2_par/*.wav
 !audio_lstm_lpf2_par/*_BEST*.wav
 audio_lstm_phaser/*.wav
 !audio_lstm_phaser/*_BEST*.wav
+audio_logic_dist_par/**/*.wav
+!audio_logic_dist_par/**/*_BEST*.wav

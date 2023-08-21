@@ -116,12 +116,19 @@ public:
 	void setLPFKnobValue(float val);
 	void togglePowerState();
 
+	void changeDistortionModel();
+
 private:
 	bool powerState;
 
 	float distKnobValue, lpfKnobValue;
 
-	std::string modelFilePathDist, modelFilePathLPF; // models
+	int currModel;
+
+	std::string modelFolder;	// model folder path
+	std::string distModelFolder, distInvModelFolder, distVShapeModelFolder, lpfModelFolder, 
+				distRandomModelFolder, distSinModelFolder; // models
+	std::vector<std::string> distModelFiles;
 	ModelType modelsDist[2], modelsLPF[2];
 
 	// prediction predict(const float *input, int channel);

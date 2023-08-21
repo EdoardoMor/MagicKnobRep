@@ -22,79 +22,9 @@
 #include "PluginProcessor.h"
 #include "NeuralNetwork.h"
 
-//==============================================================================
-/**
-*/
-
-class Dot  : public juce::Component
-{
-public:
-    Dot () :
-
-          colour (juce::Colours::white)
-    {
-        setSize (10, 10);
-        step(0 , 0);
-        setAlwaysOnTop(false);
-    }
-
-    void step(int x, int y)
-    {
-
-        setCentrePosition (x, y);
-    }
-
-    void paint (juce::Graphics& g) override
-    {
-        g.setColour (colour);
-        g.fillEllipse (0, 0, (float) getWidth() , (float) getHeight() );
-
-        g.setColour (juce::Colours::darkgrey);
-        g.drawEllipse (0, 0, (float) getWidth() , (float) getHeight() , 0.5f);
-    }
-
-
-private:
-    juce::Point<float> position, speed;
-    juce::Colour colour;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Dot)
-};
-
-class Area : public juce::TextButton
-{
-public:
-
-    Area(MagicKnobProcessor& proc) : TextButton(), audioProc(proc), dot{} 
-    {
-        addAndMakeVisible(dot);
-    }
-    
-    void mouseMove(const juce::MouseEvent& e) override
-
-    {
-        float eX = (float) e.getPosition().getX();
-        float eY = (float) e.getPosition().getY();
-        float x = eX / 440.0;
-        float y = eY / 195.0;
-        DBG(x);
-        DBG(y);
-
-        audioProc.setLPFKnobValue(x);
-        audioProc.setDistKnobValue(y);
-
-        dot.step(eX, eY);
-
-    }
-
-
-private:
-    MagicKnobProcessor& audioProc;
-    Dot dot;
-};
-
 // KNOBPAGE ------|------|------|------|------|------|------|------|------|------|------|------|
-class KnobPage : public juce::Component, public juce::Button::Listener, public juce::Slider::Listener {
+class KnobPage : public juce::Component, public juce::Button::Listener, public juce::Slider::Listener
+{
 
 public:
     KnobPage(MagicKnobProcessor &proc) : audioProc(proc)
@@ -119,7 +49,7 @@ public:
         distKnobLabel.setText("Distortion", juce::dontSendNotification);
         distKnobLabel.setFont(18.0f);
         distKnobLabel.setJustificationType(juce::Justification::centred);
-
+        
         addAndMakeVisible(distKnob);
         distKnob.addListener(this);
         distKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
@@ -140,8 +70,13 @@ public:
         lpfKnob.setRange(0, 1);
 
         addAndMakeVisible(powerToggle);
-        powerToggle.setButtonText("ON/OFF");
+        powerToggle.setButtonText("OFF");
+        powerToggle.setClickingTogglesState(true);
         powerToggle.addListener(this);
+
+        addAndMakeVisible(changeDistModelButton);
+        changeDistModelButton.addListener(this);
+        changeDistModelButton.setButtonText("Change dist");
 
         addAndMakeVisible(trainButton);
         trainButton.addListener(this);
@@ -167,9 +102,10 @@ public:
         superKnobLabel.setBounds(0, rowHeight / 2 - labelHeight, columnWidth, labelHeight);
         distKnob.setBounds(columnWidth, 0, columnWidth, rowHeight);
         distKnobLabel.setBounds(columnWidth, rowHeight / 2 - labelHeight, columnWidth, labelHeight);
-
+        
         // second row
-        powerToggle.setBounds(0, rowHeight, columnWidth, buttonHeight);
+        powerToggle.setBounds(0, rowHeight, columnWidth/2, buttonHeight);
+        changeDistModelButton.setBounds(columnWidth/2, rowHeight, columnWidth/2, buttonHeight);
         addSampleButton.setBounds(0, rowHeight + buttonHeight, columnWidth, buttonHeight);
         trainButton.setBounds(0, rowHeight + 2 * buttonHeight, columnWidth, buttonHeight);
         lpfKnob.setBounds(columnWidth, rowHeight, columnWidth, rowHeight);
@@ -206,6 +142,10 @@ public:
     {
         if (btn == &powerToggle)
             audioProc.togglePowerState();
+            if(powerToggle.getToggleState())
+                powerToggle.setButtonText("ON");
+            else 
+                powerToggle.setButtonText("OFF");
         if (btn == &addSampleButton)
         {
             float in = (float)superKnob.getValue();
@@ -232,27 +172,98 @@ public:
                 trainButton.setEnabled(false);
             }
         }
+        if (btn == &changeDistModelButton)
+        {
+            audioProc.changeDistortionModel();
+        }
     }
 
 private:
     juce::Label superKnobLabel, distKnobLabel, lpfKnobLabel;
     juce::Slider superKnob, distKnob, lpfKnob;
-    juce::ToggleButton powerToggle;
-    juce::TextButton trainButton, addSampleButton;
+    juce::TextButton powerToggle, trainButton, addSampleButton, changeDistModelButton;
 
     NeuralNetwork nn{1, 2};
     MagicKnobProcessor &audioProc;
 };
 
-class RectPage : public juce::Component, public juce::Button::Listener {
+// DOT  ------|------|------|------|------|------|------|------|------|------|------|------|
+class Dot : public juce::Component
+{
+public:
+    Dot() :
+
+            colour(juce::Colours::white)
+    {
+        setSize(10, 10);
+        step(0, 0);
+        setAlwaysOnTop(false);
+    }
+
+    void step(int x, int y)
+    {
+
+        setCentrePosition(x, y);
+    }
+
+    void paint(juce::Graphics &g) override
+    {
+        g.setColour(colour);
+        g.fillEllipse(0, 0, (float)getWidth(), (float)getHeight());
+
+        g.setColour(juce::Colours::darkgrey);
+        g.drawEllipse(0, 0, (float)getWidth(), (float)getHeight(), 0.5f);
+    }
+
+private:
+    juce::Point<float> position, speed;
+    juce::Colour colour;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Dot)
+};
+
+// AREA     ------|------|------|------|------|------|------|------|------|------|------|------|
+class Area : public juce::TextButton
+{
+public:
+    Area(MagicKnobProcessor &proc) : TextButton(), audioProc(proc), dot{}
+    {
+        addAndMakeVisible(dot);
+    }
+
+    void mouseMove(const juce::MouseEvent &e) override
+
+    {
+        float eX = (float)e.getPosition().getX();
+        float eY = (float)e.getPosition().getY();
+        float x = eX / 440.0;
+        float y = eY / 195.0;
+        DBG(x);
+        DBG(y);
+
+        audioProc.setLPFKnobValue(x);
+        audioProc.setDistKnobValue(y);
+
+        dot.step(eX, eY);
+    }
+
+private:
+    MagicKnobProcessor &audioProc;
+    Dot dot;
+};
+
+// RECTPAGE     ------|------|------|------|------|------|------|------|------|------|------|------|
+class RectPage : public juce::Component, public juce::Button::Listener
+{
 
 public:
-    RectPage(MagicKnobProcessor& proc) : audioProc(proc), area(proc) {
+    RectPage(MagicKnobProcessor &proc) : audioProc(proc), area(proc)
+    {
 
         setSize(500, 500);
 
         addAndMakeVisible(area);
-        //area.addListener(this);
+        // area.addListener(this);
         area.setName("area");
 
         addAndMakeVisible(powerToggle);
@@ -266,32 +277,27 @@ public:
         // subcomponents in your editor..
         float rowHeight = getHeight() / 5;
         powerToggle.setBounds(0, 0, getWidth() / 2, rowHeight);
-        area.setBounds(10, 150 , getWidth() - 20, rowHeight * 2);
-
+        area.setBounds(10, 150, getWidth() - 20, rowHeight * 2);
     }
 
-    void buttonClicked(juce::Button* btn) override
+    void buttonClicked(juce::Button *btn) override
     {
-        if (btn == &powerToggle) {
+        if (btn == &powerToggle)
+        {
             audioProc.togglePowerState();
         }
-
     }
-
-
-
 
 private:
     Area area;
     juce::ToggleButton powerToggle;
 
-    MagicKnobProcessor& audioProc;
-
+    MagicKnobProcessor &audioProc;
 };
 
-
 // TAB COMPONTENT   ------|------|------|------|------|------|------|------|------|------|------|
-class OurTabbedComponent : public juce::TabbedComponent {
+class OurTabbedComponent : public juce::TabbedComponent
+{
 
 public:
     OurTabbedComponent(MagicKnobProcessor &proc) : TabbedComponent(juce::TabbedButtonBar::TabsAtRight), audioP(proc)
