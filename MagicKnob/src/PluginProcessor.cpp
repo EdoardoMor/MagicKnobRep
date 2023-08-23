@@ -1,18 +1,14 @@
-/*
-  ==============================================================================
-
-	This file contains the basic framework code for a JUCE plugin processor.
-
-  ==============================================================================
-*/
+#include <regex>
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include <thread>
-#include <future>
+// #include <thread>
+// #include <future>
 #include "juce_core/system/juce_PlatformDefs.h"
 
-//==============================================================================
+/*
+	PluginProcessor
+*/
 MagicKnobProcessor::MagicKnobProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
 	: AudioProcessor(BusesProperties()
@@ -24,52 +20,14 @@ MagicKnobProcessor::MagicKnobProcessor()
 #endif
 						 )
 #endif
-
-	  , powerState(false), currModel(0)
+	  , powerState(false), currModelDist(-1), currModelLPF(-1)
 {
-	// juce::MemoryInputStream jsonStream (BinaryData::tensorflow_model_json, BinaryData::tensorflow_model.jsonSize, false);
-	// auto jsonInput = nlohmann::json::parse (jsonStream.readEntireStreamAsString().toStdString());
-	// modelsDist[0] = RTNeural::json_parser::parseJson<float> (jsonInput);
-	// modelsDist[1] = RTNeural::json_parser::parseJson<float> (jsonInput);
-
 	// modelFolder = "C:/PROGETTI/STMAE/MagicKnobRep/final_models/"
+
 	modelFolder = "/Users/macdonald/Desktop/MagicKnobRep/final_models/";
+	std::cout << "Looking for models at: " + modelFolder << std::endl;
 
-	distModelFolder = "model16_par_dist.json";
-	lpfModelFolder = "model16_par_lpf2.json";
-	distInvModelFolder = "model16_par_dist_inv.json";
-	distVShapeModelFolder = "model16_par_dist_vshape.json";
-	distRandomModelFolder = "model16_par_dist_random.json";
-	distSinModelFolder = "model16_par_dist_sin.json";
-
-	distModelFiles.push_back(distModelFolder);
-	distModelFiles.push_back(distInvModelFolder);
-	distModelFiles.push_back(distVShapeModelFolder);
-	distModelFiles.push_back(distRandomModelFolder);
-	distModelFiles.push_back(distSinModelFolder);
-
-	// TODO assert exists
-
-	//assert(std::filesystem::exists(distModelFolder));
-	//assert(std::filesystem::exists(distModelFolder));
-
-	std::cout << "Loading model at path: " << modelFolder + distModelFiles[0] << std::endl;
-
-	std::ifstream jsonStreamDist(modelFolder + distModelFiles[0], std::ifstream::binary);
-	loadModel(jsonStreamDist, modelsDist[0]);
-
-	jsonStreamDist.clear();
-	jsonStreamDist.seekg(0, std::ios::beg);
-	loadModel(jsonStreamDist, modelsDist[1]);
-
-	std::cout << "Loading model at path: " << modelFolder + lpfModelFolder << std::endl;
-
-	std::ifstream jsonStreamLPF(modelFolder + lpfModelFolder, std::ifstream::binary);
-	loadModel(jsonStreamLPF, modelsLPF[0]);
-
-	jsonStreamLPF.clear();
-	jsonStreamLPF.seekg(0, std::ios::beg);
-	loadModel(jsonStreamLPF, modelsLPF[1]);
+	searchJsonModelsInDir(modelFolder);
 }
 
 MagicKnobProcessor::~MagicKnobProcessor()
@@ -141,11 +99,8 @@ void MagicKnobProcessor::changeProgramName(int index, const juce::String &newNam
 //==============================================================================
 void MagicKnobProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-	modelsDist[0].reset();
-	modelsDist[1].reset();
-
-	modelsLPF[0].reset();
-	modelsLPF[1].reset();
+	loadNextModel("dist");
+	loadNextModel("lpf");
 }
 
 void MagicKnobProcessor::releaseResources()
@@ -193,26 +148,6 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 
 	for (int i = numInChannels; i < getNumOutputChannels(); ++i)
 		buffer.clear(i, 0, buffer.getNumSamples());
-
-	// std::vector<float *> data;
-	// for (int i = 0; i < numInChannels; ++i)
-	// 	data.push_back(buffer.getWritePointer(i));
-
-	// for (int i = 0; i < buffer.getNumSamples(); ++i)
-	// {
-
-	// 	/* DECOMMENTARE PER NET A 2 INPUT
-	// 	float temp[2] = {channelData[i], superKnobValue};
-	// 	const float *inputArr = temp;
-	// 	channelData[i] = model.forward(inputArr);
-	// 	*/
-
-	// 	int channel = 0;
-	// 	for (auto channelData : data)
-	// 	{
-	// 		auto res1 = std::async(this->predict, &channelData[i], channel);
-	// 	}
-	// }
 
 	// use compile-time model
 	for (int ch = 0; ch < numInChannels; ++ch)
@@ -285,6 +220,42 @@ juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 	return new MagicKnobProcessor();
 }
 
+void MagicKnobProcessor::searchJsonModelsInDir(std::string modelFolder)
+{
+	for (const auto &entry : std::filesystem::directory_iterator(modelFolder))
+	{
+		std::string name, str_temp;
+		std::stringstream ss(entry.path());
+		std::vector<std::string> splitted;
+
+		while (std::getline(ss, name, '/'))
+		{
+		} // need the last one
+
+		std::stringstream ssName(name);
+		std::vector<std::string> splittedName;
+
+		while (std::getline(ssName, str_temp, '_'))
+			splittedName.push_back(str_temp);
+
+		if (splittedName.size() == 4)
+		{
+			if (splittedName[2] == "dist")
+				distModelFiles.push_back(name);
+			else if (splittedName[2] == "lpf2")
+				lpfModelFiles.push_back(name);
+		}
+	}
+
+	for(std::string model: distModelFiles)
+		std::cout << "Found Distortion model: " + model << std::endl;
+	
+	for(std::string model: lpfModelFiles)
+		std::cout << "Found LPF model: " + model << std::endl;
+
+	std::cout << std::endl;
+}
+
 void MagicKnobProcessor::loadModel(std::ifstream &jsonStream, ModelType &model)
 {
 	nlohmann::json modelJson;
@@ -323,19 +294,56 @@ void MagicKnobProcessor::togglePowerState()
 	// std::cout << powerState << std::endl;
 }
 
-void MagicKnobProcessor::changeDistortionModel()
+void MagicKnobProcessor::loadModelFromJson(ModelType *models, std::string path)
 {
-	modelsDist[0].reset();
-	modelsDist[1].reset();
+	std::cout << "Loading model at path: " << path << std::endl;
+	std::ifstream jsonStream(path, std::ifstream::binary);
+	loadModel(jsonStream, models[0]);
 
-	++currModel;
+	jsonStream.clear();
+	jsonStream.seekg(0, std::ios::beg);
+	loadModel(jsonStream, models[1]);
+}
 
-	std::cout << modelFolder + distModelFiles[currModel % distModelFiles.size()] << std::endl;
+void MagicKnobProcessor::loadNextModel(std::string knobId)
+{
+	if (knobId == "dist")
+	{
+		++currModelDist;
 
-	std::ifstream jsonStreamDist(modelFolder + distModelFiles[currModel % distModelFiles.size()], std::ifstream::binary);
-	loadModel(jsonStreamDist, modelsDist[0]);
+		modelsDist[0].reset();
+		modelsDist[1].reset();
 
-	jsonStreamDist.clear();
-	jsonStreamDist.seekg(0, std::ios::beg);
-	loadModel(jsonStreamDist, modelsDist[1]);
+		loadModelFromJson(modelsDist, modelFolder + distModelFiles[currModelDist % distModelFiles.size()]);
+	}
+
+	if (knobId == "lpf")
+	{
+		++currModelLPF;
+
+		modelsLPF[0].reset();
+		modelsLPF[1].reset();
+
+		loadModelFromJson(modelsLPF, modelFolder + lpfModelFiles[currModelLPF % lpfModelFiles.size()]);
+	}
+}
+
+std::string MagicKnobProcessor::getCurrentModel(std::string knobId)
+{
+	std::string name = "", str_temp;
+	if (knobId == "dist")
+		name = distModelFiles[currModelDist % distModelFiles.size()];
+
+	if (knobId == "lpf")
+		name = lpfModelFiles[currModelLPF % lpfModelFiles.size()];
+
+	std::stringstream ss(name);
+	std::vector<std::string> splitted;
+
+	while (std::getline(ss, str_temp, '_'))
+		splitted.push_back(str_temp);
+
+	assert(splitted.size() == 4);
+
+	return splitted[3];
 }

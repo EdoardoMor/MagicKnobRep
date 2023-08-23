@@ -8,10 +8,6 @@
 
 #pragma once
 
-// not this:
-// #include <JuceHeader.h>
-// but this:
-
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <juce_analytics/juce_analytics.h>
@@ -36,12 +32,6 @@
 #include <iostream>
 //#include <filesystem>
 #include <RTNeural/RTNeural.h>
-
-struct prediction
-{
-	int channel;
-	float modelOutput;
-};
 
 // per model_dist (1 o 2) .json
 using ModelType = RTNeural::ModelT<float, 2, 1, RTNeural::LSTMLayerT<float, 2, 16>, RTNeural::DenseT<float, 16, 1>>;
@@ -110,28 +100,31 @@ public:
 	/** add some midi to be played at the sent sample offset*/
 	void addMidi(juce::MidiMessage msg, int sampleOffset);
 
+	void searchJsonModelsInDir(std::string modelFolder);
 	void loadModel(std::ifstream &jsonStream, ModelType &model);
 
 	void setDistKnobValue(float val);
 	void setLPFKnobValue(float val);
 	void togglePowerState();
 
-	void changeDistortionModel();
+	void loadNextModel(std::string knobId);
+	std::string getCurrentModel(std::string knobId);
 
 private:
 	bool powerState;
 
 	float distKnobValue, lpfKnobValue;
 
-	int currModel;
+	int currModelDist, currModelLPF;
 
 	std::string modelFolder;	// model folder path
-	std::string distModelFolder, distInvModelFolder, distVShapeModelFolder, lpfModelFolder, 
-				distRandomModelFolder, distSinModelFolder; // models
-	std::vector<std::string> distModelFiles;
+	std::string distModelJson, distInvModelJson, distVShapeModelJson, distRandomModelJson, distSinModelJson;	// dist models
+	std::string lpfModelJson, lpfRandomModelJson;	// lpf models
+	std::vector<std::string> distModelFiles, lpfModelFiles;
+
 	ModelType modelsDist[2], modelsLPF[2];
 
-	// prediction predict(const float *input, int channel);
+	void loadModelFromJson(ModelType* models, std::string path);
 
 	//==============================================================================
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MagicKnobProcessor)
