@@ -51,10 +51,10 @@ public:
     {
         float eX = (float)e.getPosition().getX();
         float eY = (float)e.getPosition().getY();
-        float x = eX / 440.0;
-        float y = eY / 195.0;
-        DBG(x);
-        DBG(y);
+        float x = eX / getWidth();
+        float y = eY / getHeight();
+        // DBG("X: " + x + " Y: " + y);
+        std::cout << "X: " << x << " Y: " << y << std::endl;
 
         audioProc.setLPFKnobValue(x);
         audioProc.setDistKnobValue(y);
@@ -74,16 +74,14 @@ class RectPage : public juce::Component, public juce::Button::Listener
 public:
     RectPage(MagicKnobProcessor &proc) : audioProc(proc), area(proc)
     {
-        setSize(500, 500);
-
         addAndMakeVisible(area);
-        // area.addListener(this);
         area.setName("area");
         area.setEnabled(false);
         area.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
 
         addAndMakeVisible(powerToggle);
-        powerToggle.setButtonText("ON/OFF");
+        powerToggle.setButtonText("OFF");
+        powerToggle.setClickingTogglesState(true);
         powerToggle.addListener(this);
     }
 
@@ -91,14 +89,16 @@ public:
     {
         // This is generally where you'll want to lay out the positions of any
         // subcomponents in your editor..
-        float rowHeight = getHeight() / 5;
-        int padding = 10;
+        int paddingTop = 10, paddingRightLeft = 30;
 
-        powerToggle.setBounds(0, 0, getWidth() / 2, rowHeight);
-        
-        juce::Rectangle rect = getLocalBounds().removeFromBottom(rowHeight * 4);
-        rect = rect.withSizeKeepingCentre(rect.getWidth() - padding, rect.getHeight() - padding);
+        juce::Rectangle rect = getLocalBounds();
+        int rectWidth = rect.getWidth() - paddingRightLeft * 2;
+        rect = rect.withSizeKeepingCentre(rectWidth, rectWidth).withY(paddingTop);
+
         area.setBounds(rect);
+
+        int buttonHeight = getHeight() - getWidth();
+        powerToggle.setBounds(0, getWidth(), getWidth() / 3, buttonHeight);
     }
 
     void buttonClicked(juce::Button *btn) override
@@ -106,12 +106,30 @@ public:
         if (btn == &powerToggle)
         {
             audioProc.togglePowerState();
+            
+            if (powerToggle.getToggleState())
+                powerToggle.setButtonText("ON");
+            else
+                powerToggle.setButtonText("OFF");
+        }
+    }
+
+    void updatePowerState(bool powerState)
+    {
+        if (powerToggle.getToggleState() != powerState)
+        {
+            powerToggle.setToggleState(powerState, juce::dontSendNotification);
+
+            if (powerToggle.getToggleState())
+                powerToggle.setButtonText("ON");
+            else
+                powerToggle.setButtonText("OFF");
         }
     }
 
 private:
     Area area;
-    juce::ToggleButton powerToggle;
+    juce::TextButton powerToggle;
 
     MagicKnobProcessor &audioProc;
 };

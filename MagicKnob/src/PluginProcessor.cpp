@@ -1,4 +1,5 @@
 #include <regex>
+#include <algorithm>
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
@@ -238,14 +239,17 @@ void MagicKnobProcessor::searchJsonModelsInDir(std::string modelFolder)
 		while (std::getline(ssName, str_temp, '_'))
 			splittedName.push_back(str_temp);
 
-		if (splittedName.size() == 4)
+		if (splittedName.size() == 5)
 		{
-			if (splittedName[2] == "dist")
+			if (splittedName[3] == "dist")
 				distModelFiles.push_back(name);
-			else if (splittedName[2] == "lpf2")
+			else if (splittedName[3] == "lpf2")
 				lpfModelFiles.push_back(name);
 		}
 	}
+
+	sort(distModelFiles.begin(), distModelFiles.end());
+	sort(lpfModelFiles.begin(), lpfModelFiles.end());
 
 	for(std::string model: distModelFiles)
 		std::cout << "Found Distortion model: " + model << std::endl;
@@ -292,6 +296,16 @@ void MagicKnobProcessor::togglePowerState()
 {
 	powerState = !powerState;
 	// std::cout << powerState << std::endl;
+}
+
+bool MagicKnobProcessor::getCurrPowerState()
+{
+	return powerState;
+}
+
+void MagicKnobProcessor::setCurrPowerState(bool newState)
+{
+	powerState = newState;
 }
 
 void MagicKnobProcessor::loadModelFromJson(ModelType *models, std::string path)
@@ -343,7 +357,7 @@ std::string MagicKnobProcessor::getCurrentModel(std::string knobId)
 	while (std::getline(ss, str_temp, '_'))
 		splitted.push_back(str_temp);
 
-	assert(splitted.size() == 4);
+	assert(splitted.size() == 5);
 
-	return splitted[3];
+	return splitted[4];
 }

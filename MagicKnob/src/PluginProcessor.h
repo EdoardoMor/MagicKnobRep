@@ -105,6 +105,9 @@ public:
 
 	void setDistKnobValue(float val);
 	void setLPFKnobValue(float val);
+
+	bool getCurrPowerState();
+	void setCurrPowerState(bool newState);
 	void togglePowerState();
 
 	void loadNextModel(std::string knobId);

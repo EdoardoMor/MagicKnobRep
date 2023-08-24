@@ -28,12 +28,30 @@ class OurTabbedComponent : public juce::TabbedComponent
 public:
     OurTabbedComponent(MagicKnobProcessor &proc) : TabbedComponent(juce::TabbedButtonBar::TabsAtRight), audioP(proc)
     {
-        addTab("KnobPage", juce::Colours::indianred, new KnobPage(audioP), true);
-        addTab("RectPage", juce::Colours::indianred, new RectPage(audioP), true);
+        knobPage = new KnobPage(audioP);
+        rectPage = new RectPage(audioP);
+
+        addTab("KnobPage", juce::Colours::indianred, knobPage, true);
+        addTab("RectPage", juce::Colours::indianred, rectPage, true);
+    }
+
+    void currentTabChanged(int newCurrentTabIndex, const juce::String &newCurrentTabName) override	
+    {
+        // std::cout << newCurrentTabName << std::endl;
+        bool powerState = audioP.getCurrPowerState();
+
+        if (newCurrentTabName == "KnobPage") 
+            knobPage->updatePowerState(powerState);
+        else 
+            rectPage->updatePowerState(powerState);
+
     }
 
 private:
     MagicKnobProcessor &audioP;
+
+    KnobPage* knobPage;
+    RectPage* rectPage;
 };
 
 /*

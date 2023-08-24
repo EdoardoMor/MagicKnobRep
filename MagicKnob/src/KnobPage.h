@@ -10,7 +10,7 @@
 
 #include <torch/torch.h>
 
-/* 
+/*
     KnobPage component for the main tab in PluginEditor
     Features:
     *   play manually using distortion and lpf knobs
@@ -23,8 +23,6 @@ class KnobPage : public juce::Component, public juce::Button::Listener, public j
 public:
     KnobPage(MagicKnobProcessor &proc) : audioProc(proc)
     {
-        setSize(500, 500);
-
         // superKnob
         addAndMakeVisible(superKnobLabel);
         superKnobLabel.setText("SuperKnob", juce::dontSendNotification);
@@ -115,11 +113,14 @@ public:
     void buttonClicked(juce::Button *btn) override
     {
         if (btn == &powerToggle)
+        {
             audioProc.togglePowerState();
-        if (powerToggle.getToggleState())
-            powerToggle.setButtonText("ON");
-        else
-            powerToggle.setButtonText("OFF");
+
+            if (powerToggle.getToggleState())
+                powerToggle.setButtonText("ON");
+            else
+                powerToggle.setButtonText("OFF");
+        }
         if (btn == &addSampleButton)
         {
             float in = (float)superKnob.getValue();
@@ -145,6 +146,19 @@ public:
                 trainButton.setButtonText("Train SuperKnob");
                 trainButton.setEnabled(false);
             }
+        }
+    }
+
+    void updatePowerState(bool powerState)
+    {
+        if (powerToggle.getToggleState() != powerState)
+        {
+            powerToggle.setToggleState(powerState, juce::dontSendNotification);
+
+            if (powerToggle.getToggleState())
+                powerToggle.setButtonText("ON");
+            else
+                powerToggle.setButtonText("OFF");
         }
     }
 
