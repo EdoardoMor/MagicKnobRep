@@ -5,13 +5,13 @@
 
 #include "PluginProcessor.h"
 
-/* 
+/*
     Custom slider with double click and integrated name and current model labels
 */
 class DCSlider : public juce::Slider
 {
 public:
-    DCSlider(MagicKnobProcessor &proc, std::string id, std::string knobName) : audioProc(proc), sliderId{id}
+    DCSlider(MagicKnobProcessor &proc, std::string id, std::string knobName) : audioProc(proc), sliderId{id}, knobName{knobName}
     {
         addAndMakeVisible(knobNameLabel);
         knobNameLabel.setText(knobName, juce::dontSendNotification);
@@ -27,7 +27,7 @@ public:
     void mouseDoubleClick(const juce::MouseEvent &event) override
     {
         audioProc.loadNextModel(sliderId);
-        currModelLabel.setText(audioProc.getCurrentModel(sliderId), juce::dontSendNotification);
+        updateDisplayedModel();
     }
 
     void resized() override
@@ -38,13 +38,18 @@ public:
         int columnWidth = (int)getWidth();
         int labelHeight = 20;
 
-        knobNameLabel.setBounds(0, rowHeight/2 - labelHeight, columnWidth, labelHeight);
-        currModelLabel.setBounds(0, rowHeight/2, columnWidth, labelHeight);
+        knobNameLabel.setBounds(0, rowHeight / 2 - labelHeight, columnWidth, labelHeight);
+        currModelLabel.setBounds(0, rowHeight / 2, columnWidth, labelHeight);
+    }
+
+    void updateDisplayedModel()
+    {
+        currModelLabel.setText(audioProc.getCurrentModel(sliderId), juce::dontSendNotification);
     }
 
 private:
     MagicKnobProcessor &audioProc;
-    const std::string sliderId;
+    const std::string sliderId, knobName;
 
     juce::Label knobNameLabel, currModelLabel;
 

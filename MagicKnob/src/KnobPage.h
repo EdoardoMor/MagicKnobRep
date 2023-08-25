@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include "DCSlider.h"
+#include "TabPage.h"
 #include "PluginProcessor.h"
 #include "NeuralNetwork.h"
 
@@ -17,12 +18,14 @@
     *   double click on distortion and lpf knobs to cycle between models
     *   add training points and train superknob to play using a single knob
 */
-class KnobPage : public juce::Component, public juce::Button::Listener, public juce::Slider::Listener
+class KnobPage : public TabPage, public juce::Slider::Listener
 {
 
 public:
-    KnobPage(MagicKnobProcessor &proc) : audioProc(proc)
+    KnobPage(MagicKnobProcessor &proc) : TabPage(proc)
     {
+        // powerToggle = TabPage::getPowerToggle();
+
         // superKnob
         addAndMakeVisible(superKnobLabel);
         superKnobLabel.setText("SuperKnob", juce::dontSendNotification);
@@ -51,11 +54,6 @@ public:
         lpfKnob.setNumDecimalPlacesToDisplay(2);
         lpfKnob.setRange(0, 1);
 
-        addAndMakeVisible(powerToggle);
-        powerToggle.setButtonText("OFF");
-        powerToggle.setClickingTogglesState(true);
-        powerToggle.addListener(this);
-
         addAndMakeVisible(changeDistModelButton);
         changeDistModelButton.addListener(this);
         changeDistModelButton.setButtonText("Change dist");
@@ -72,25 +70,52 @@ public:
 
     void resized() override
     {
-        // This is generally where you'll want to lay out the positions of any
-        // subcomponents in your editor..
-        int rowHeight = (int)getHeight() / 2;
-        int columnWidth = (int)getWidth() / 2;
+        int paddingSmall = 10, paddingButton = 4;
+
+        // LOCAL BOUNDS
+        juce::Rectangle localBoundsWithPad = getLocalBounds().withSizeKeepingCentre(getWidth() - paddingSmall * 2, getHeight() - paddingSmall * 2);
+        // localBoundsWithPad.translate(paddingSmall / 2, 0);
+
+        int knobWidth = localBoundsWithPad.getWidth() / 2;
+        int knobHeight = localBoundsWithPad.getHeight() / 2;
         int labelHeight = 20;
-        int buttonHeight = (int)rowHeight / 3;
 
-        // first row
-        superKnob.setBounds(0, 0, columnWidth, rowHeight);
-        superKnobLabel.setBounds(0, rowHeight / 2 - labelHeight, columnWidth, labelHeight);
-        distKnob.setBounds(columnWidth, 0, columnWidth, rowHeight);
-        distKnobLabel.setBounds(columnWidth, rowHeight / 2 - labelHeight, columnWidth, labelHeight);
+        //  KNOBS
+        juce::Rectangle superKnobRect = localBoundsWithPad.withTrimmedRight(knobWidth).withTrimmedBottom(knobHeight);
+        superKnobRect = superKnobRect.withSizeKeepingCentre(knobWidth - paddingSmall / 2, knobHeight - paddingSmall / 2);
 
-        // second row
-        powerToggle.setBounds(0, rowHeight, columnWidth, buttonHeight);
-        addSampleButton.setBounds(0, rowHeight + buttonHeight, columnWidth, buttonHeight);
-        trainButton.setBounds(0, rowHeight + 2 * buttonHeight, columnWidth, buttonHeight);
-        lpfKnob.setBounds(columnWidth, rowHeight, columnWidth, rowHeight);
-        lpfKnobLabel.setBounds(columnWidth, rowHeight * 3 / 2 - labelHeight, columnWidth, labelHeight);
+        juce::Point pos = superKnobRect.getPosition();
+        juce::Rectangle<int> superKnobLabelRect = juce::Rectangle<int>(0, 0, knobHeight - paddingSmall / 2, labelHeight);
+        superKnobLabelRect.setPosition(pos);
+        superKnobLabelRect.translate(0, superKnobRect.getHeight() / 2 - labelHeight);
+
+        juce::Rectangle distKnobRect = localBoundsWithPad.withTrimmedLeft(knobWidth).withTrimmedBottom(knobHeight);
+        distKnobRect = distKnobRect.withSizeKeepingCentre(knobWidth - paddingSmall / 2, knobHeight - paddingSmall / 2);
+        juce::Rectangle lpfKnobRect = localBoundsWithPad.withTrimmedLeft(knobWidth).withTrimmedTop(knobHeight);
+        lpfKnobRect = lpfKnobRect.withSizeKeepingCentre(knobWidth - paddingSmall / 2, knobHeight - paddingSmall / 2);
+
+        superKnob.setBounds(superKnobRect);
+        superKnobLabel.setBounds(superKnobLabelRect);
+        distKnob.setBounds(distKnobRect);
+        lpfKnob.setBounds(lpfKnobRect);
+
+        // BUTTONS
+        juce::Rectangle buttonsRect = localBoundsWithPad.withTrimmedRight(knobWidth).withTrimmedTop(knobHeight);
+        buttonsRect = buttonsRect.withSizeKeepingCentre(knobWidth - paddingSmall, knobHeight - paddingSmall / 2);
+        buttonsRect.translate(0, paddingButton);
+
+        int singleButtonHeight = buttonsRect.getHeight() / 3;
+        int buttonWidth = buttonsRect.getWidth();
+        juce::Rectangle<int> singleButtonRect1 = buttonsRect.withTrimmedBottom(singleButtonHeight * 2);
+        singleButtonRect1 = singleButtonRect1.withSizeKeepingCentre(buttonWidth, singleButtonHeight - paddingButton);
+        juce::Rectangle<int> singleButtonRect2 = buttonsRect.withTrimmedBottom(singleButtonHeight).withTrimmedTop(singleButtonHeight);
+        singleButtonRect2 = singleButtonRect2.withSizeKeepingCentre(buttonWidth, singleButtonHeight - paddingButton);
+        juce::Rectangle<int> singleButtonRect3 = buttonsRect.withTrimmedTop(singleButtonHeight * 2);
+        singleButtonRect3 = singleButtonRect3.withSizeKeepingCentre(buttonWidth, singleButtonHeight - paddingButton);
+
+        powerToggle.setBounds(singleButtonRect1);
+        addSampleButton.setBounds(singleButtonRect2);
+        trainButton.setBounds(singleButtonRect3);
     }
 
     void sliderValueChanged(juce::Slider *slider) override
@@ -112,15 +137,8 @@ public:
 
     void buttonClicked(juce::Button *btn) override
     {
-        if (btn == &powerToggle)
-        {
-            audioProc.togglePowerState();
+        TabPage::buttonClicked(btn); // for powerState button
 
-            if (powerToggle.getToggleState())
-                powerToggle.setButtonText("ON");
-            else
-                powerToggle.setButtonText("OFF");
-        }
         if (btn == &addSampleButton)
         {
             float in = (float)superKnob.getValue();
@@ -149,25 +167,17 @@ public:
         }
     }
 
-    void updatePowerState(bool powerState)
+    void updateDisplayedModels() override
     {
-        if (powerToggle.getToggleState() != powerState)
-        {
-            powerToggle.setToggleState(powerState, juce::dontSendNotification);
-
-            if (powerToggle.getToggleState())
-                powerToggle.setButtonText("ON");
-            else
-                powerToggle.setButtonText("OFF");
-        }
+        distKnob.updateDisplayedModel();
+        lpfKnob.updateDisplayedModel();
     }
 
 private:
     NeuralNetwork nn{1, 2};
-    MagicKnobProcessor &audioProc;
 
     juce::Label superKnobLabel, distKnobLabel, lpfKnobLabel;
     juce::Slider superKnob;
     DCSlider distKnob{audioProc, "dist", "Distortion"}, lpfKnob{audioProc, "lpf", "LPF"};
-    juce::TextButton powerToggle, trainButton, addSampleButton, changeDistModelButton;
+    juce::TextButton trainButton, addSampleButton, changeDistModelButton;
 };

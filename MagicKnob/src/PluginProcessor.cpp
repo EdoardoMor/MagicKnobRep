@@ -21,7 +21,8 @@ MagicKnobProcessor::MagicKnobProcessor()
 #endif
 						 )
 #endif
-	  , powerState(false), currModelDist(-1), currModelLPF(-1)
+	  ,
+	  powerState(false), currModelDist(-1), currModelLPF(-1)
 {
 	// modelFolder = "C:/PROGETTI/STMAE/MagicKnobRep/final_models/"
 
@@ -251,10 +252,10 @@ void MagicKnobProcessor::searchJsonModelsInDir(std::string modelFolder)
 	sort(distModelFiles.begin(), distModelFiles.end());
 	sort(lpfModelFiles.begin(), lpfModelFiles.end());
 
-	for(std::string model: distModelFiles)
+	for (std::string model : distModelFiles)
 		std::cout << "Found Distortion model: " + model << std::endl;
-	
-	for(std::string model: lpfModelFiles)
+
+	for (std::string model : lpfModelFiles)
 		std::cout << "Found LPF model: " + model << std::endl;
 
 	std::cout << std::endl;

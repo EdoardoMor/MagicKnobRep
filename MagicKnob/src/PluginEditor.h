@@ -33,25 +33,32 @@ public:
 
         addTab("KnobPage", juce::Colours::indianred, knobPage, true);
         addTab("RectPage", juce::Colours::indianred, rectPage, true);
+
+        setTabBarDepth(31); // to have an even size in the pages
     }
 
-    void currentTabChanged(int newCurrentTabIndex, const juce::String &newCurrentTabName) override	
+    void currentTabChanged(int newCurrentTabIndex, const juce::String &newCurrentTabName) override
     {
         // std::cout << newCurrentTabName << std::endl;
         bool powerState = audioP.getCurrPowerState();
 
-        if (newCurrentTabName == "KnobPage") 
+        if (newCurrentTabName == "KnobPage")
+        {
             knobPage->updatePowerState(powerState);
-        else 
+            knobPage->updateDisplayedModels();
+        }
+        else if (newCurrentTabName == "RectPage")
+        {
             rectPage->updatePowerState(powerState);
-
+            rectPage->updateDisplayedModels();
+        }
     }
 
 private:
     MagicKnobProcessor &audioP;
 
-    KnobPage* knobPage;
-    RectPage* rectPage;
+    KnobPage *knobPage;
+    RectPage *rectPage;
 };
 
 /*
