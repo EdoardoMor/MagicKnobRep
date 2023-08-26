@@ -30,3 +30,9 @@ audio_lstm_lpf2_par/**/*.wav
 audio_logic_dist_par/**/*.wav
 !audio_logic_dist_par/**/*_BEST*.wav
 !audio_logic_dist_par/output*/*.wav
+audio_conv1d_dist_par/**/*.wav
+!audio_conv1d_dist_par/**/*_BEST*.wav
+!audio_conv1d_dist_par/output*/*.wav
+audio_conv1d_lpf2_par/**/*.wav
+!audio_conv1d_lpf2_par/**/*_BEST*.wav
+!audio_conv1d_lpf2_par/output*/*.wav

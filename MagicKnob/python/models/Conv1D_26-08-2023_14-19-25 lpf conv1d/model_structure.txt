@@ -1,0 +1,17 @@
+SimpleConv1D(
+  (conv1): Conv1d(2, 16, kernel_size=(5,), stride=(1,), padding=same)
+  (act1): PReLU(num_parameters=1)
+  (conv2): Conv1d(16, 32, kernel_size=(5,), stride=(1,), padding=same)
+  (act2): PReLU(num_parameters=1)
+  (conv3): Conv1d(32, 64, kernel_size=(5,), stride=(1,), padding=same)
+  (act3): PReLU(num_parameters=1)
+  (conv4): Conv1d(64, 32, kernel_size=(5,), stride=(1,), padding=same)
+  (act4): PReLU(num_parameters=1)
+  (conv5): Conv1d(32, 16, kernel_size=(5,), stride=(1,), padding=same)
+  (act5): PReLU(num_parameters=1)
+  (conv6): Conv1d(16, 1, kernel_size=(5,), stride=(1,), padding=same)
+  (act6): PReLU(num_parameters=1)
+)
+total params: 26007
+input files: /input/
+output files: /output/
