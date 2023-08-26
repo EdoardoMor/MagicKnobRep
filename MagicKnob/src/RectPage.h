@@ -18,6 +18,8 @@ public:
         setSize(10, 10);
         step(0, 0);
         setAlwaysOnTop(false);
+
+        setInterceptsMouseClicks(false, false);
     }
 
     void step(int x, int y)
@@ -48,7 +50,8 @@ public:
     Area(MagicKnobProcessor &proc) : TextButton(), audioProc(proc), dot{}
     {
         addAndMakeVisible(dot);
-        // dot.addMouseListener(this, false);
+        
+        dot.addMouseListener(this, false);
     }
 
     void mouseDrag(const juce::MouseEvent &e) override
@@ -74,8 +77,6 @@ public:
     {
         widthArea = getWidth();
         heightArea = getHeight();
-
-        DBG(widthArea);
     }
 
 private:
