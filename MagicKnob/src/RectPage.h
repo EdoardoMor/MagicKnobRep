@@ -48,24 +48,39 @@ public:
     Area(MagicKnobProcessor &proc) : TextButton(), audioProc(proc), dot{}
     {
         addAndMakeVisible(dot);
+        // dot.addMouseListener(this, false);
     }
 
     void mouseDrag(const juce::MouseEvent &e) override
     {
         float eX = (float)e.getPosition().getX();
         float eY = (float)e.getPosition().getY();
-        float x = eX / getWidth();
-        float y = 1 - eY / getHeight();
-        // DBG("X: " + x + " Y: " + y);
-        std::cout << "X: " << x << " Y: " << y << std::endl;
 
-        audioProc.setLPFKnobValue(x);
-        audioProc.setDistKnobValue(y);
+        if (eX >= 0 && eX <= widthArea && eY >= 0 && eY <= heightArea)
+        {
+            float x = eX / widthArea;
+            float y = 1 - eY / heightArea;
+            // DBG("X: " + x + " Y: " + y);
+            std::cout << "X: " << x << " Y: " << y << std::endl;
 
-        dot.step(eX, eY);
+            audioProc.setLPFKnobValue(x);
+            audioProc.setDistKnobValue(y);
+
+            dot.step(eX, eY);
+        }
+    }
+
+    void updateMeasures()
+    {
+        widthArea = getWidth();
+        heightArea = getHeight();
+
+        DBG(widthArea);
     }
 
 private:
+    int widthArea, heightArea;
+
     MagicKnobProcessor &audioProc;
     Dot dot;
 };
@@ -148,6 +163,7 @@ public:
         juce::Rectangle<int> areaRect = areaAndLabelRect.withTrimmedLeft(paddingLarge).withTrimmedBottom(paddingLarge);
 
         area.setBounds(areaRect);
+        area.updateMeasures();
 
         // VERTICAL LABELS
         juce::Rectangle<int> verticalLabelRect = areaAndLabelRect.withTrimmedRight(areaRect.getWidth()).withTrimmedBottom(paddingLarge);
