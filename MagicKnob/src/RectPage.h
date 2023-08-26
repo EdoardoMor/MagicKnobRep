@@ -50,7 +50,7 @@ public:
         addAndMakeVisible(dot);
     }
 
-    void mouseMove(const juce::MouseEvent &e) override
+    void mouseDrag(const juce::MouseEvent &e) override
     {
         float eX = (float)e.getPosition().getX();
         float eY = (float)e.getPosition().getY();
@@ -82,25 +82,25 @@ public:
         area.setEnabled(false);
         area.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
 
-        addAndMakeVisible(currDistModelLabel);
-        currDistModelLabel.setText(audioProc.getCurrentModel("dist"), juce::dontSendNotification);
-        currDistModelLabel.setFont(14.0f);
-        currDistModelLabel.setJustificationType(juce::Justification::centred);
+        addAndMakeVisible(lpfModelLabel);
+        lpfModelLabel.setText("LPF", juce::dontSendNotification);
+        lpfModelLabel.setFont(18.0f);
+        lpfModelLabel.setJustificationType(juce::Justification::centredRight);
 
         addAndMakeVisible(currLPFModelLabel);
         currLPFModelLabel.setText(audioProc.getCurrentModel("lpf"), juce::dontSendNotification);
         currLPFModelLabel.setFont(14.0f);
-        currLPFModelLabel.setJustificationType(juce::Justification::centred);
+        currLPFModelLabel.setJustificationType(juce::Justification::centredLeft);
 
         addAndMakeVisible(distModelLabel);
         distModelLabel.setText("Distortion", juce::dontSendNotification);
         distModelLabel.setFont(18.0f);
-        distModelLabel.setJustificationType(juce::Justification::centred);
+        distModelLabel.setJustificationType(juce::Justification::centredRight);
 
-        addAndMakeVisible(lpfModelLabel);
-        lpfModelLabel.setText("LPF", juce::dontSendNotification);
-        lpfModelLabel.setFont(18.0f);
-        lpfModelLabel.setJustificationType(juce::Justification::centred);
+        addAndMakeVisible(currDistModelLabel);
+        currDistModelLabel.setText(audioProc.getCurrentModel("dist"), juce::dontSendNotification);
+        currDistModelLabel.setFont(14.0f);
+        currDistModelLabel.setJustificationType(juce::Justification::centredLeft);
 
         addAndMakeVisible(minLPFLabel);
         minLPFLabel.setText("0", juce::dontSendNotification);
@@ -125,10 +125,12 @@ public:
         addAndMakeVisible(nextDistModelButton);
         nextDistModelButton.setButtonText("Change Distortion");
         nextDistModelButton.addListener(this);
+        nextDistModelButton.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
 
         addAndMakeVisible(nextLPFModelButton);
         nextLPFModelButton.setButtonText("Change LPF");
         nextLPFModelButton.addListener(this);
+        nextLPFModelButton.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
     }
 
     void resized() override

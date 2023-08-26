@@ -15,6 +15,8 @@ public:
         powerToggle.setButtonText("OFF");
         powerToggle.setClickingTogglesState(true);
         powerToggle.addListener(this);
+        powerToggle.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
+        powerToggle.setColour(juce::TextButton::buttonOnColourId, juce::Colours::brown);
     }
 
     void buttonClicked(juce::Button *btn) override

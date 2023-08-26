@@ -54,18 +54,16 @@ public:
         lpfKnob.setNumDecimalPlacesToDisplay(2);
         lpfKnob.setRange(0, 1);
 
-        addAndMakeVisible(changeDistModelButton);
-        changeDistModelButton.addListener(this);
-        changeDistModelButton.setButtonText("Change dist");
-
         addAndMakeVisible(trainButton);
         trainButton.addListener(this);
         trainButton.setButtonText("Train SuperKnob");
         trainButton.setEnabled(false);
+        trainButton.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
 
         addAndMakeVisible(addSampleButton);
         addSampleButton.addListener(this);
         addSampleButton.setButtonText("Add training datapoint");
+        addSampleButton.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
     }
 
     void resized() override
@@ -85,7 +83,7 @@ public:
         superKnobRect = superKnobRect.withSizeKeepingCentre(knobWidth - paddingSmall / 2, knobHeight - paddingSmall / 2);
 
         juce::Point pos = superKnobRect.getPosition();
-        juce::Rectangle<int> superKnobLabelRect = juce::Rectangle<int>(0, 0, knobHeight - paddingSmall / 2, labelHeight);
+        juce::Rectangle<int> superKnobLabelRect = juce::Rectangle<int>(0, 0, knobWidth - paddingSmall / 2, labelHeight);
         superKnobLabelRect.setPosition(pos);
         superKnobLabelRect.translate(0, superKnobRect.getHeight() / 2 - labelHeight);
 
@@ -176,8 +174,8 @@ public:
 private:
     NeuralNetwork nn{1, 2};
 
-    juce::Label superKnobLabel, distKnobLabel, lpfKnobLabel;
+    juce::Label superKnobLabel;
     juce::Slider superKnob;
     DCSlider distKnob{audioProc, "dist", "Distortion"}, lpfKnob{audioProc, "lpf", "LPF"};
-    juce::TextButton trainButton, addSampleButton, changeDistModelButton;
+    juce::TextButton trainButton, addSampleButton;
 };
