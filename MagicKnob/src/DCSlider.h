@@ -22,6 +22,9 @@ public:
         currModelLabel.setText(audioProc.getCurrentModel(sliderId), juce::dontSendNotification);
         currModelLabel.setFont(14.0f);
         currModelLabel.setJustificationType(juce::Justification::centred);
+
+        knobNameLabel.addMouseListener(this, false);
+        currModelLabel.addMouseListener(this, false);
     }
 
     void mouseDoubleClick(const juce::MouseEvent &event) override
