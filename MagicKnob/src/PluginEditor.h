@@ -28,6 +28,19 @@ class OurTabbedComponent : public juce::TabbedComponent
 public:
     OurTabbedComponent(MagicKnobProcessor &proc) : TabbedComponent(juce::TabbedButtonBar::TabsAtRight), audioP(proc)
     {
+        // custom look and feel
+        auto &lnf = getLookAndFeel();
+        lnf.setColour(juce::Slider::thumbColourId, juce::Colours::brown);
+        lnf.setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::khaki);
+        lnf.setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::whitesmoke);
+        lnf.setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
+        lnf.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::brown);
+        lnf.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::khaki);
+        lnf.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
+        lnf.setColour(juce::ComboBox::outlineColourId, juce::Colours::khaki); // outline for buttons, it's a bug
+
+        sendLookAndFeelChange();
+
         knobPage = new KnobPage(audioP);
         rectPage = new RectPage(audioP);
 

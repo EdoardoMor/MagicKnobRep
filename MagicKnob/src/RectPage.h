@@ -13,13 +13,13 @@
 class Dot : public juce::Component
 {
 public:
-    Dot() : colour(juce::Colours::white)
+    Dot() : colourFill{juce::Colours::white}, colourOutline{juce::Colours::khaki}
     {
-        setSize(10, 10);
-        step(0, 0);
+        setSize(diameter, diameter);
         setAlwaysOnTop(false);
-
         setInterceptsMouseClicks(false, false);
+
+        step(0, 0);
     }
 
     void step(int x, int y)
@@ -29,16 +29,17 @@ public:
 
     void paint(juce::Graphics &g) override
     {
-        g.setColour(colour);
-        g.fillEllipse(0, 0, (float)getWidth(), (float)getHeight());
+        g.setColour(colourFill);
+        g.fillEllipse(0, 0, diameter, diameter);
 
-        g.setColour(juce::Colours::darkgrey);
-        g.drawEllipse(0, 0, (float)getWidth(), (float)getHeight(), 0.5f);
+        g.setColour(colourOutline);
+        g.drawEllipse(0, 0, diameter, diameter, 2.0f);
     }
 
 private:
+    float diameter = 10;
     juce::Point<float> position, speed;
-    juce::Colour colour;
+    juce::Colour colourFill, colourOutline;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Dot)
 };
@@ -50,7 +51,7 @@ public:
     Area(MagicKnobProcessor &proc) : TextButton(), audioProc(proc), dot{}
     {
         addAndMakeVisible(dot);
-        
+
         dot.addMouseListener(this, false);
     }
 
@@ -96,7 +97,6 @@ public:
         addAndMakeVisible(area);
         area.setName("area");
         area.setEnabled(false);
-        area.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
 
         addAndMakeVisible(lpfModelLabel);
         lpfModelLabel.setText("LPF", juce::dontSendNotification);
@@ -141,12 +141,10 @@ public:
         addAndMakeVisible(nextDistModelButton);
         nextDistModelButton.setButtonText("Change Distortion");
         nextDistModelButton.addListener(this);
-        nextDistModelButton.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
 
         addAndMakeVisible(nextLPFModelButton);
         nextLPFModelButton.setButtonText("Change LPF");
         nextLPFModelButton.addListener(this);
-        nextLPFModelButton.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
     }
 
     void resized() override
@@ -154,6 +152,7 @@ public:
         int paddingSmall = 10, paddingLarge = 30, paddingButton = 4;
         int horizontalWidthLabel = 90; // == verticalHeightLabel
         int buttonHeight = 50;
+        int labelDisplacement = 18;
 
         juce::Rectangle localBoundsWithPad = getLocalBounds().withSizeKeepingCentre(getWidth() - paddingSmall * 2, getHeight() - paddingSmall * 2);
 
@@ -195,9 +194,11 @@ public:
         pos = horizontalLabelRect.getPosition();
 
         juce::Rectangle<int> horizontalModelLabelRect = horizontalLabelRect.withTrimmedRight(horizontalLabelRect.getWidth() - horizontalWidthLabel);
-        horizontalModelLabelRect = horizontalModelLabelRect.withPosition(pos.getX() + horizontalLabelRect.getWidth() / 2 - horizontalWidthLabel, pos.getY());
+        horizontalModelLabelRect = horizontalModelLabelRect.withPosition(getWidth() / 2 - horizontalWidthLabel - labelDisplacement, pos.getY());
+        // horizontalModelLabelRect = horizontalModelLabelRect.withPosition(pos.getX() + horizontalLabelRect.getWidth() / 2 - horizontalWidthLabel, pos.getY());
         juce::Rectangle<int> horizontalCurrModelLabelRect = horizontalLabelRect.withTrimmedLeft(horizontalLabelRect.getWidth() - horizontalWidthLabel);
-        horizontalCurrModelLabelRect = horizontalCurrModelLabelRect.withPosition(pos.getX() + horizontalLabelRect.getWidth() / 2, pos.getY());
+        horizontalCurrModelLabelRect = horizontalCurrModelLabelRect.withPosition(getWidth() / 2 - labelDisplacement, pos.getY());
+        // horizontalCurrModelLabelRect = horizontalCurrModelLabelRect.withPosition(pos.getX() + horizontalLabelRect.getWidth() / 2, pos.getY());
 
         lpfModelLabel.setBounds(horizontalModelLabelRect);
         currLPFModelLabel.setBounds(horizontalCurrModelLabelRect);

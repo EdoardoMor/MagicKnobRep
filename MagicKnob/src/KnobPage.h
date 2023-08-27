@@ -24,8 +24,6 @@ class KnobPage : public TabPage, public juce::Slider::Listener
 public:
     KnobPage(MagicKnobProcessor &proc) : TabPage(proc)
     {
-        // powerToggle = TabPage::getPowerToggle();
-
         // superKnob
         addAndMakeVisible(superKnobLabel);
         superKnobLabel.setText("SuperKnob", juce::dontSendNotification);
@@ -58,12 +56,10 @@ public:
         trainButton.addListener(this);
         trainButton.setButtonText("Train SuperKnob");
         trainButton.setEnabled(false);
-        trainButton.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
 
         addAndMakeVisible(addSampleButton);
         addSampleButton.addListener(this);
         addSampleButton.setButtonText("Add training datapoint");
-        addSampleButton.setColour(juce::TextButton::buttonColourId, juce::Colours::brown);
     }
 
     void resized() override
