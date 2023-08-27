@@ -1,19 +1,15 @@
 instructions.*
-.vscode
+**/.vscode
 .cache
-build/
+**/build/
 
-MagicKnob/build/
-MagicKnob/.vscode/
-MagicKnob/__pycache/
-MagicKnob/python/__pycache__
-MagicKnob/tensorflow/__pycache__
-MagicKnob/python/runs
-MagicKnob/runs/
+**/__pycache__
+**/runs/
 MagicKnob/CMakeLists.txt
 MagicKnob/.tmp.drivedownload
 MagicKnob/.tmp.driveupload
+MagicKnob/tboards
 
 **/.DS_Store
 **/Icon?
-*.ini
+**/*.ini
