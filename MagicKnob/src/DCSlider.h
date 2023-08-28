@@ -41,8 +41,8 @@ public:
         int columnWidth = (int)getWidth();
         int labelHeight = 20;
 
-        knobNameLabel.setBounds(0, rowHeight / 2 - labelHeight, columnWidth, labelHeight);
-        currModelLabel.setBounds(0, rowHeight / 2, columnWidth, labelHeight);
+        knobNameLabel.setBounds(0, rowHeight / 2 - labelHeight*3/2, columnWidth, labelHeight);
+        currModelLabel.setBounds(0, rowHeight / 2 - labelHeight/2, columnWidth, labelHeight);
     }
 
     void updateDisplayedModel()

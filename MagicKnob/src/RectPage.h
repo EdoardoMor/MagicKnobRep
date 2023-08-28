@@ -101,42 +101,42 @@ public:
         addAndMakeVisible(lpfModelLabel);
         lpfModelLabel.setText("LPF", juce::dontSendNotification);
         lpfModelLabel.setFont(18.0f);
-        lpfModelLabel.setJustificationType(juce::Justification::centredRight);
+        lpfModelLabel.setJustificationType(juce::Justification::bottomRight);
 
         addAndMakeVisible(currLPFModelLabel);
         currLPFModelLabel.setText(audioProc.getCurrentModel("lpf"), juce::dontSendNotification);
         currLPFModelLabel.setFont(14.0f);
-        currLPFModelLabel.setJustificationType(juce::Justification::centredLeft);
+        currLPFModelLabel.setJustificationType(juce::Justification::bottomLeft);
 
         addAndMakeVisible(distModelLabel);
         distModelLabel.setText("Distortion", juce::dontSendNotification);
         distModelLabel.setFont(18.0f);
-        distModelLabel.setJustificationType(juce::Justification::centredRight);
+        distModelLabel.setJustificationType(juce::Justification::bottomRight);
 
         addAndMakeVisible(currDistModelLabel);
         currDistModelLabel.setText(audioProc.getCurrentModel("dist"), juce::dontSendNotification);
         currDistModelLabel.setFont(14.0f);
-        currDistModelLabel.setJustificationType(juce::Justification::centredLeft);
+        currDistModelLabel.setJustificationType(juce::Justification::bottomLeft);
 
         addAndMakeVisible(minLPFLabel);
         minLPFLabel.setText("0", juce::dontSendNotification);
         minLPFLabel.setFont(16.0f);
-        minLPFLabel.setJustificationType(juce::Justification::centred);
+        minLPFLabel.setJustificationType(juce::Justification::centredBottom);
 
         addAndMakeVisible(maxLPFLabel);
         maxLPFLabel.setText("1", juce::dontSendNotification);
         maxLPFLabel.setFont(16.0f);
-        maxLPFLabel.setJustificationType(juce::Justification::centred);
+        maxLPFLabel.setJustificationType(juce::Justification::centredBottom);
 
         addAndMakeVisible(minDistLabel);
         minDistLabel.setText("0", juce::dontSendNotification);
         minDistLabel.setFont(16.0f);
-        minDistLabel.setJustificationType(juce::Justification::centred);
+        minDistLabel.setJustificationType(juce::Justification::centredBottom);
 
         addAndMakeVisible(maxDistLabel);
         maxDistLabel.setText("1", juce::dontSendNotification);
         maxDistLabel.setFont(16.0f);
-        maxDistLabel.setJustificationType(juce::Justification::centred);
+        maxDistLabel.setJustificationType(juce::Justification::centredBottom);
 
         addAndMakeVisible(nextDistModelButton);
         nextDistModelButton.setButtonText("Change Distortion");
@@ -149,7 +149,7 @@ public:
 
     void resized() override
     {
-        int paddingSmall = 10, paddingLarge = 30, paddingButton = 4;
+        int paddingSmall = 10, paddingLarge = 30, paddingXSmall = 4;
         int horizontalWidthLabel = 90; // == verticalHeightLabel
         int buttonHeight = 50;
         int labelDisplacement = 18;
@@ -167,6 +167,7 @@ public:
 
         // VERTICAL LABELS
         juce::Rectangle<int> verticalLabelRect = areaAndLabelRect.withTrimmedRight(areaRect.getWidth()).withTrimmedBottom(paddingLarge);
+        verticalLabelRect = verticalLabelRect.withTrimmedLeft(paddingXSmall);
         juce::Rectangle<int> verticalLabel0Rect = verticalLabelRect.withTrimmedTop(verticalLabelRect.getHeight() - paddingLarge);
         verticalLabel0Rect.translate(0, paddingLarge / 2 - 1);
         juce::Rectangle<int> verticalLabel1Rect = verticalLabelRect.withTrimmedBottom(verticalLabelRect.getHeight() - paddingLarge);
@@ -186,6 +187,7 @@ public:
 
         // HORIZONTAL LABELS
         juce::Rectangle<int> horizontalLabelRect = areaAndLabelRect.withTrimmedTop(areaRect.getWidth()).withTrimmedLeft(paddingLarge);
+        horizontalLabelRect = horizontalLabelRect.withTrimmedBottom(paddingXSmall);
         juce::Rectangle<int> horizontalLabel0Rect = horizontalLabelRect.withTrimmedRight(horizontalLabelRect.getWidth() - paddingLarge);
         horizontalLabel0Rect.translate(-paddingLarge / 2 + 1, 0);
         juce::Rectangle<int> horizontalLabel1Rect = horizontalLabelRect.withTrimmedLeft(horizontalLabelRect.getWidth() - paddingLarge);
@@ -195,10 +197,8 @@ public:
 
         juce::Rectangle<int> horizontalModelLabelRect = horizontalLabelRect.withTrimmedRight(horizontalLabelRect.getWidth() - horizontalWidthLabel);
         horizontalModelLabelRect = horizontalModelLabelRect.withPosition(getWidth() / 2 - horizontalWidthLabel - labelDisplacement, pos.getY());
-        // horizontalModelLabelRect = horizontalModelLabelRect.withPosition(pos.getX() + horizontalLabelRect.getWidth() / 2 - horizontalWidthLabel, pos.getY());
         juce::Rectangle<int> horizontalCurrModelLabelRect = horizontalLabelRect.withTrimmedLeft(horizontalLabelRect.getWidth() - horizontalWidthLabel);
         horizontalCurrModelLabelRect = horizontalCurrModelLabelRect.withPosition(getWidth() / 2 - labelDisplacement, pos.getY());
-        // horizontalCurrModelLabelRect = horizontalCurrModelLabelRect.withPosition(pos.getX() + horizontalLabelRect.getWidth() / 2, pos.getY());
 
         lpfModelLabel.setBounds(horizontalModelLabelRect);
         currLPFModelLabel.setBounds(horizontalCurrModelLabelRect);
@@ -209,11 +209,11 @@ public:
         juce::Rectangle<int> buttonRect = localBoundsWithPad.withTrimmedTop(localBoundsWithPad.getHeight() - buttonHeight);
         int singleButtonWidth = buttonRect.getWidth() / 3;
         juce::Rectangle<int> singleButtonRect1 = buttonRect.withTrimmedRight(singleButtonWidth * 2);
-        singleButtonRect1 = singleButtonRect1.withSizeKeepingCentre(singleButtonWidth - paddingButton, buttonHeight);
+        singleButtonRect1 = singleButtonRect1.withSizeKeepingCentre(singleButtonWidth - paddingXSmall, buttonHeight);
         juce::Rectangle<int> singleButtonRect2 = buttonRect.withTrimmedRight(singleButtonWidth).withTrimmedLeft(singleButtonWidth);
-        singleButtonRect2 = singleButtonRect2.withSizeKeepingCentre(singleButtonWidth - paddingButton, buttonHeight);
+        singleButtonRect2 = singleButtonRect2.withSizeKeepingCentre(singleButtonWidth - paddingXSmall, buttonHeight);
         juce::Rectangle<int> singleButtonRect3 = buttonRect.withTrimmedLeft(singleButtonWidth * 2);
-        singleButtonRect3 = singleButtonRect3.withSizeKeepingCentre(singleButtonWidth - paddingButton, buttonHeight);
+        singleButtonRect3 = singleButtonRect3.withSizeKeepingCentre(singleButtonWidth - paddingXSmall, buttonHeight);
 
         powerToggle.setBounds(singleButtonRect1);
         nextDistModelButton.setBounds(singleButtonRect2);

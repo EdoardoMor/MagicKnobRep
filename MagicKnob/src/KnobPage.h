@@ -4,12 +4,12 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 
 #include <iostream>
+#include <torch/torch.h>
+
 #include "DCSlider.h"
 #include "TabPage.h"
 #include "PluginProcessor.h"
 #include "NeuralNetwork.h"
-
-#include <torch/torch.h>
 
 /*
     KnobPage component for the main tab in PluginEditor
@@ -24,6 +24,8 @@ class KnobPage : public TabPage, public juce::Slider::Listener
 public:
     KnobPage(MagicKnobProcessor &proc) : TabPage(proc)
     {
+        int sliderLabelWidth = 80, sliderLabelHeight = 25;
+
         // superKnob
         addAndMakeVisible(superKnobLabel);
         superKnobLabel.setText("SuperKnob", juce::dontSendNotification);
@@ -33,7 +35,7 @@ public:
         addAndMakeVisible(superKnob);
         superKnob.addListener(this);
         superKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        superKnob.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 80, 20);
+        superKnob.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, sliderLabelWidth, sliderLabelHeight);
         superKnob.setNumDecimalPlacesToDisplay(2);
         superKnob.setRange(0, 1);
 
@@ -41,14 +43,14 @@ public:
         addAndMakeVisible(distKnob);
         distKnob.addListener(this);
         distKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        distKnob.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 80, 20);
+        distKnob.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, sliderLabelWidth, sliderLabelHeight);
         distKnob.setNumDecimalPlacesToDisplay(2);
         distKnob.setRange(0, 1);
 
         addAndMakeVisible(lpfKnob);
         lpfKnob.addListener(this);
         lpfKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        lpfKnob.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 80, 20);
+        lpfKnob.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, sliderLabelWidth, sliderLabelHeight);
         lpfKnob.setNumDecimalPlacesToDisplay(2);
         lpfKnob.setRange(0, 1);
 
@@ -68,7 +70,6 @@ public:
 
         // LOCAL BOUNDS
         juce::Rectangle localBoundsWithPad = getLocalBounds().withSizeKeepingCentre(getWidth() - paddingSmall * 2, getHeight() - paddingSmall * 2);
-        // localBoundsWithPad.translate(paddingSmall / 2, 0);
 
         int knobWidth = localBoundsWithPad.getWidth() / 2;
         int knobHeight = localBoundsWithPad.getHeight() / 2;
