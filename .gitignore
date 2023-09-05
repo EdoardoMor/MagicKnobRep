@@ -5,7 +5,6 @@ instructions.*
 
 **/__pycache__
 **/runs/
-MagicKnob/CMakeLists.txt
 MagicKnob/.tmp.drivedownload
 MagicKnob/.tmp.driveupload
 MagicKnob/tboards
