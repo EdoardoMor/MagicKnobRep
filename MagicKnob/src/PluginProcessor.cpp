@@ -293,6 +293,16 @@ void MagicKnobProcessor::setLPFKnobValue(float val)
 	lpfKnobValue = val;
 }
 
+float getDistKnobValue()
+{
+	return distKnobValue;
+}
+
+float getLPFKnobValue()
+{
+	return lpfKnobValue;
+}
+
 void MagicKnobProcessor::togglePowerState()
 {
 	powerState = !powerState;

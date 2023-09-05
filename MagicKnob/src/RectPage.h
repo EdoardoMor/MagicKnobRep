@@ -242,6 +242,11 @@ public:
         currLPFModelLabel.setText(audioProc.getCurrentModel("lpf"), juce::dontSendNotification);
     }
 
+    void updateDisplayedValues() override
+    {
+        area.step(audioProc.getDistKnobValue(), audioProc.getLPFKnobValue());
+    }
+
 private:
     static void setVerticalRotatedWithBounds(juce::Component &component, bool clockWiseRotation, juce::Rectangle<int> verticalBounds)
     {

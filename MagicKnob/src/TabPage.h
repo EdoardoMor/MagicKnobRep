@@ -38,6 +38,7 @@ public:
     }
 
     virtual void updateDisplayedModels() = 0;
+    virtual void updateDisplayedValues() = 0;
 
 protected:
     juce::TextButton powerToggle;

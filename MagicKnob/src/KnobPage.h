@@ -168,6 +168,12 @@ public:
         lpfKnob.updateDisplayedModel();
     }
 
+    void updateDisplayedValue() override
+    {
+        distKnob.setValue(audioProc.getDistKnobValue(), juce::dontSendNotification);
+        lpfKnob.setValue(audioProc.getLPFKnobValue(), juce::dontSendNotification);
+    }
+
 private:
     NeuralNetwork nn{1, 2};
 
