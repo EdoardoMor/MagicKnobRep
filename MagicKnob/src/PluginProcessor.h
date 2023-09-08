@@ -24,11 +24,12 @@
 #include <iostream>
 #include <RTNeural/RTNeural.h>
 
-
 using ModelType = RTNeural::ModelT<float, 2, 1, RTNeural::LSTMLayerT<float, 2, 16>, RTNeural::DenseT<float, 16, 1>>;
 
 /**
- */
+	PluginProcessor
+	Manages the audio manipulation and houses the values for the distortion and the LPF effects
+*/
 class MagicKnobProcessor : public juce::AudioProcessor
 #if JucePlugin_Enable_ARA
 	,
@@ -36,11 +37,9 @@ class MagicKnobProcessor : public juce::AudioProcessor
 #endif
 {
 public:
-	//==============================================================================
 	MagicKnobProcessor();
 	~MagicKnobProcessor() override;
 
-	//==============================================================================
 	void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 	void releaseResources() override;
 
@@ -50,11 +49,9 @@ public:
 
 	void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
 
-	//==============================================================================
 	juce::AudioProcessorEditor *createEditor() override;
 	bool hasEditor() const override;
 
-	//==============================================================================
 	const juce::String getName() const override;
 
 	bool acceptsMidi() const override;
@@ -62,18 +59,15 @@ public:
 	bool isMidiEffect() const override;
 	double getTailLengthSeconds() const override;
 
-	//==============================================================================
 	int getNumPrograms() override;
 	int getCurrentProgram() override;
 	void setCurrentProgram(int index) override;
 	const juce::String getProgramName(int index) override;
 	void changeProgramName(int index, const juce::String &newName) override;
 
-	//==============================================================================
 	void getStateInformation(juce::MemoryBlock &destData) override;
 	void setStateInformation(const void *data, int sizeInBytes) override;
 
-	/** add some midi to be played at the sent sample offset*/
 	void addMidi(juce::MidiMessage msg, int sampleOffset);
 
 	void searchJsonModelsInDir(std::string modelFolder);
@@ -98,15 +92,14 @@ private:
 
 	int currModelDist, currModelLPF;
 
-	std::string modelFolder;	// model folder path
-	std::string distModelJson, distInvModelJson, distVShapeModelJson, distRandomModelJson, distSinModelJson;	// dist models
-	std::string lpfModelJson, lpfRandomModelJson;	// lpf models
+	std::string modelFolder;																				 // model folder path
+	std::string distModelJson, distInvModelJson, distVShapeModelJson, distRandomModelJson, distSinModelJson; // dist models
+	std::string lpfModelJson, lpfRandomModelJson;															 // lpf models
 	std::vector<std::string> distModelFiles, lpfModelFiles;
 
 	ModelType modelsDist[2], modelsLPF[2];
 
-	void loadModelFromJson(ModelType* models, std::string path);
+	void loadModelFromJson(ModelType *models, std::string path);
 
-	//==============================================================================
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MagicKnobProcessor)
 };

@@ -11,7 +11,7 @@
 #include "PluginProcessor.h"
 #include "NeuralNetwork.h"
 
-/*
+/**
     KnobPage component for the main tab in PluginEditor
     Features:
     *   play manually using distortion and lpf knobs
@@ -168,7 +168,7 @@ public:
         lpfKnob.updateDisplayedModel();
     }
 
-    void updateDisplayedValue() override
+    void updateDisplayedValues() override
     {
         distKnob.setValue(audioProc.getDistKnobValue(), juce::dontSendNotification);
         lpfKnob.setValue(audioProc.getLPFKnobValue(), juce::dontSendNotification);

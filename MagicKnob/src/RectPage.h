@@ -10,6 +10,10 @@
 #include "PluginProcessor.h"
 
 // DOT  ------|------|------|------|------|------|------|------|------|------|------|------|
+/**
+    Dot
+    Figure that indicates the couple of values in the distortion - lpf plane.
+*/
 class Dot : public juce::Component
 {
 public:
@@ -45,6 +49,10 @@ private:
 };
 
 // AREA     ------|------|------|------|------|------|------|------|------|------|------|------|
+/**
+    Area
+    Distortion - lpf plane. Can be clicked and dragged to move the Dot object.
+*/
 class Area : public juce::TextButton
 {
 public:
@@ -74,10 +82,20 @@ public:
         }
     }
 
+    void mouseDown(const juce::MouseEvent &e) override
+    {
+        mouseDrag(e);
+    }
+
     void updateMeasures()
     {
         widthArea = getWidth();
         heightArea = getHeight();
+    }
+
+    void updateDotPosition(float distValue, float lpfValue)
+    {
+        dot.step(lpfValue * heightArea, widthArea - distValue * widthArea);
     }
 
 private:
@@ -88,6 +106,12 @@ private:
 };
 
 // RECTPAGE     ------|------|------|------|------|------|------|------|------|------|------|------|
+/**
+    RectPage component for the main tab in PluginEditor
+    Features:
+    *   play manually moving the displayed dot in the area clicking it and dragging the mouse on it
+    *   buttons to cycle between models
+*/
 class RectPage : public TabPage
 {
 
@@ -244,7 +268,7 @@ public:
 
     void updateDisplayedValues() override
     {
-        area.step(audioProc.getDistKnobValue(), audioProc.getLPFKnobValue());
+        area.updateDotPosition(audioProc.getDistKnobValue(), audioProc.getLPFKnobValue());
     }
 
 private:

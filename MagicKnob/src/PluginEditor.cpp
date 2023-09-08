@@ -1,11 +1,3 @@
-/*
-  ==============================================================================
-
-	This file contains the basic framework code for a JUCE plugin editor.
-
-  ==============================================================================
-*/
-
 #include <iostream>
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
@@ -16,7 +8,6 @@
 // #include <chrono>
 // #include <thread>
 
-//==============================================================================
 MagicKnobEditor::MagicKnobEditor(MagicKnobProcessor &p)
 	: AudioProcessorEditor(&p), audioProcessor(p), tabs{p}
 {
@@ -30,7 +21,6 @@ MagicKnobEditor::~MagicKnobEditor()
 {
 }
 
-//==============================================================================
 void MagicKnobEditor::paint(juce::Graphics &g)
 {
 	// (Our component is opaque, so we must completely fill the background with a solid colour)
