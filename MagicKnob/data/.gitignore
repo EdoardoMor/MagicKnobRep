@@ -36,3 +36,4 @@ audio_conv1d_dist_par/**/*.wav
 audio_conv1d_lpf2_par/**/*.wav
 !audio_conv1d_lpf2_par/**/*_BEST*.wav
 !audio_conv1d_lpf2_par/output*/*.wav
+!**/input/*.wav

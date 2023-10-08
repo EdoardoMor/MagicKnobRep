@@ -3,13 +3,8 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-// #include <thread>
-// #include <future>
 #include "juce_core/system/juce_PlatformDefs.h"
 
-/*
-	PluginProcessor
-*/
 MagicKnobProcessor::MagicKnobProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
 	: AudioProcessor(BusesProperties()
@@ -36,7 +31,6 @@ MagicKnobProcessor::~MagicKnobProcessor()
 {
 }
 
-//==============================================================================
 const juce::String MagicKnobProcessor::getName() const
 {
 	return JucePlugin_Name;
@@ -98,7 +92,6 @@ void MagicKnobProcessor::changeProgramName(int index, const juce::String &newNam
 {
 }
 
-//==============================================================================
 void MagicKnobProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 	loadNextModel("dist");
@@ -182,15 +175,6 @@ void MagicKnobProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::Mi
 	}
 }
 
-// prediction MagicKnobProcessor::predict(const float *input, int channel)
-// {
-// 	prediction result;
-// 	result.modelOutput = modelsDist[channel].forward(input);
-// 	result.channel = channel;
-// 	return result;
-// }
-
-//==============================================================================
 bool MagicKnobProcessor::hasEditor() const
 {
 	return true; // (change this to false if you choose to not supply an editor)
@@ -201,7 +185,6 @@ juce::AudioProcessorEditor *MagicKnobProcessor::createEditor()
 	return new MagicKnobEditor(*this);
 }
 
-//==============================================================================
 void MagicKnobProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
 	// You should use this method to store your parameters in the memory block.
@@ -215,7 +198,6 @@ void MagicKnobProcessor::setStateInformation(const void *data, int sizeInBytes)
 	// whose contents will have been created by the getStateInformation() call.
 }
 
-//==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
@@ -291,6 +273,16 @@ void MagicKnobProcessor::setDistKnobValue(float val)
 void MagicKnobProcessor::setLPFKnobValue(float val)
 {
 	lpfKnobValue = val;
+}
+
+float MagicKnobProcessor::getDistKnobValue()
+{
+	return distKnobValue;
+}
+
+float MagicKnobProcessor::getLPFKnobValue()
+{
+	return lpfKnobValue;
 }
 
 void MagicKnobProcessor::togglePowerState()

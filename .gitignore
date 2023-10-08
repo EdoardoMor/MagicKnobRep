@@ -12,3 +12,8 @@ MagicKnob/tboards
 **/.DS_Store
 **/Icon?
 **/*.ini
+
+documentation/STMAE_Project_report*
+!documentation/*.pdf
+!documentation/*.tex
+!documentation/*.sty

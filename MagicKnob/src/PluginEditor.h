@@ -1,11 +1,3 @@
-/*
-  ==============================================================================
-
-    This file contains the basic framework code for a JUCE plugin editor.
-
-  ==============================================================================
-*/
-
 #pragma once
 
 // not this:
@@ -19,8 +11,9 @@
 #include "KnobPage.h"
 #include "RectPage.h"
 
-/*
-    Custom TabComponent with KnobPage and RectPage
+/**
+    Custom TabComponent with KnobPage and RectPage.
+    It handles changes between tabs, updating displayed the powerButton, displayed models and values
 */
 class OurTabbedComponent : public juce::TabbedComponent
 {
@@ -59,11 +52,13 @@ public:
         {
             knobPage->updatePowerState(powerState);
             knobPage->updateDisplayedModels();
+            knobPage->updateDisplayedValues();
         }
         else if (newCurrentTabName == "RectPage")
         {
             rectPage->updatePowerState(powerState);
             rectPage->updateDisplayedModels();
+            rectPage->updateDisplayedValues();
         }
     }
 
@@ -74,8 +69,9 @@ private:
     RectPage *rectPage;
 };
 
-/*
+/**
     PluginEditor
+    Creates and AudioProcessor and the CustomTabComponent
 */
 class MagicKnobEditor : public juce::AudioProcessorEditor
 {
@@ -84,8 +80,7 @@ public:
     MagicKnobEditor(MagicKnobProcessor &);
     ~MagicKnobEditor() override;
 
-    //==============================================================================
-    void paint(juce::Graphics &) override;
+        void paint(juce::Graphics &) override;
     void resized() override;
 
     // juce::AudioBuffer<float> getAudioBufferFromFile(juce::File file); //POTREBBE TORNARE UTILE

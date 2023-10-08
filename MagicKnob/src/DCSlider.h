@@ -5,13 +5,14 @@
 
 #include "PluginProcessor.h"
 
-/*
-    Custom slider with double click and integrated name and current model labels
-*/
+/**
+    DCSlider
+    Custom slider with knobName label and current model label. Double clicking DCSlider allows to cycle between models.
+ */
 class DCSlider : public juce::Slider
 {
 public:
-    DCSlider(MagicKnobProcessor &proc, std::string id, std::string knobName) : audioProc(proc), sliderId{id}, knobName{knobName}
+    DCSlider(MagicKnobProcessor &proc, std::string id, std::string name) : audioProc(proc), sliderId{id}, knobName{name}
     {
         addAndMakeVisible(knobNameLabel);
         knobNameLabel.setText(knobName, juce::dontSendNotification);
@@ -41,8 +42,8 @@ public:
         int columnWidth = (int)getWidth();
         int labelHeight = 20;
 
-        knobNameLabel.setBounds(0, rowHeight / 2 - labelHeight*3/2, columnWidth, labelHeight);
-        currModelLabel.setBounds(0, rowHeight / 2 - labelHeight/2, columnWidth, labelHeight);
+        knobNameLabel.setBounds(0, rowHeight / 2 - labelHeight * 3 / 2, columnWidth, labelHeight);
+        currModelLabel.setBounds(0, rowHeight / 2 - labelHeight / 2, columnWidth, labelHeight);
     }
 
     void updateDisplayedModel()

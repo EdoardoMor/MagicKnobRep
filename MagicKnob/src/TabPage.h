@@ -5,6 +5,13 @@
 
 #include "PluginProcessor.h"
 
+/**
+    TabPage
+    Parent component for KnobPage and RectPage
+    Features:
+    *   handles the powerToggle button
+    *   virtual methods for updating models and values when a tab is changed
+*/
 class TabPage : public juce::Component, public juce::Button::Listener
 {
 
@@ -38,6 +45,7 @@ public:
     }
 
     virtual void updateDisplayedModels() = 0;
+    virtual void updateDisplayedValues() = 0;
 
 protected:
     juce::TextButton powerToggle;
